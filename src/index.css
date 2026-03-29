@@ -1,0 +1,43 @@
+@import url("https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap");
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #193557;
+  --color-accent: #39ac86;
+  --color-light: #f9fafb;
+  --color-bg: #ebeff4;
+  --color-muted: #6c7e93;
+  --color-card-bg: #ffffff;
+  --color-card-label: #eef2f6;
+  --color-light-gray: #e0e6eb;
+  --color-text-dark: #152232;
+  --color-danger: #a12c2c;
+  --color-soft-danger: #e94f37;
+
+  --text-small: 10px;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: "Montserrat", sans-serif;
+}
+
+@keyframes smallBounce {
+  0% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(-10px);
+  }
+}
+
+.small-bounce {
+  animation-name: smallBounce;
+  animation-duration: 2s;
+  animation-direction: alternate;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+}
