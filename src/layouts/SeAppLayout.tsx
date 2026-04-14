@@ -1,5 +1,5 @@
 import type { IContainerProp } from "@/components/container/SeContainer";
-import Hero from "@/components/hero/Hero";
+import Hero from "@/pages/home/hero/Hero";
 import SeAppNavbar from "@/components/nav/SeAppNavbar";
 
 const SeAppLayout = ({ children }: IContainerProp) => {

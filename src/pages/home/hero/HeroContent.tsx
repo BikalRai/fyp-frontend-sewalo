@@ -1,5 +1,5 @@
 import { GoDotFill } from "react-icons/go";
-import SeButton from "../button/SeButton";
+import SeButton from "../../../components/button/SeButton";
 import HeroContentCircle from "./HeroContentCircle";
 import { IoMdArrowForward } from "react-icons/io";
 

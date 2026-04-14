@@ -1,6 +1,6 @@
 import { IoMdArrowForward } from "react-icons/io";
-import SeButton from "../button/SeButton";
-import SeContainerSM from "../container/SeContainerSM";
+import SeButton from "../../../components/button/SeButton";
+import SeContainerSM from "../../../components/container/SeContainerSM";
 
 const HowItWorkCTA = () => {
   return (

@@ -1,6 +1,6 @@
 import { HiOutlineBolt } from "react-icons/hi2";
 import { IoLocationOutline, IoStar } from "react-icons/io5";
-import SeButton from "../button/SeButton";
+import SeButton from "../../../components/button/SeButton";
 import { GoLock } from "react-icons/go";
 
 const cardPros = [

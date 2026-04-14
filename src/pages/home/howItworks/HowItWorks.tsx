@@ -1,5 +1,5 @@
-import SeContainer from "../container/SeContainer";
-import SeContainerPadding from "../container/SeContainerPadding";
+import SeContainer from "../../../components/container/SeContainer";
+import SeContainerPadding from "../../../components/container/SeContainerPadding";
 import HowItWorksHeading from "./HowItWorksHeading";
 import { useState } from "react";
 import HomeOwner from "./HomeOwner";
@@ -16,7 +16,7 @@ const HowItWorks = () => {
   return (
     <SeContainerPadding>
       <SeContainer>
-        <section className='pt-25.5 grid gap-12' id='how-it-works'>
+        <section className='py-25.5 grid gap-12' id='how-it-works'>
           <HowItWorksHeading />
           <div className='flex justify-center items-center gap-6 bg-light w-fit mx-auto p-1.5 rounded-lg'>
             <div

@@ -1,4 +1,4 @@
-import SeContainer from "../container/SeContainer";
+import SeContainer from "../../../components/container/SeContainer";
 import HeroBanner from "./HeroBanner";
 import HeroContent from "./HeroContent";
 
