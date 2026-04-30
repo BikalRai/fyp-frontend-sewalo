@@ -13,6 +13,7 @@ export interface IButtonProps {
   size?: "sm" | "md" | "large";
   icon?: React.ReactElement;
   iconPosition?: "left" | "right";
+  styleClass?: string;
 }
 
 const variantStlyes = {
@@ -40,6 +41,7 @@ const SeButton = ({
   size = "md",
   icon,
   iconPosition,
+  styleClass,
 }: IButtonProps) => {
   const iconIsLeft = iconPosition === "left";
   return (
@@ -47,7 +49,7 @@ const SeButton = ({
       type={type}
       onClick={clickFunc}
       disabled={disabled}
-      className={`${buttonStyles[size]} border rounded-lg font-semibold ${variantStlyes[variant]} flex items-center justify-center gap-2 hover:shadow-lg transition cursor-pointer text-xs md:text-sm`}
+      className={`${buttonStyles[size]} border rounded-lg font-semibold ${variantStlyes[variant]} flex items-center justify-center gap-2 hover:shadow-lg transition cursor-pointer text-xs md:text-sm ${styleClass}`}
     >
       {iconIsLeft && icon && <span>{icon}</span>}
       <span>{btnText}</span>

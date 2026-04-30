@@ -5,6 +5,8 @@ import PricingButtons from "./PricingButtons";
 import { useState } from "react";
 import HomeOwner from "./HomeOwner";
 import MontlyPricing from "./MontlyPricing";
+import YearlyPricing from "./YearlyPricing";
+import PricingLabels from "./PricingLabels";
 
 const Pricing = () => {
   const [activeTab, setActiveTab] = useState<string>("monthly");
@@ -13,10 +15,21 @@ const Pricing = () => {
     <section className='bg-primary py-25.5'>
       <SeContainer>
         <SeContainerPadding>
-          <PricingSectionHeaders />
-          <PricingButtons activeTab={activeTab} func={setActiveTab} />
-          <HomeOwner />
-          <MontlyPricing />
+          <div className='grid gap-12'>
+            <PricingSectionHeaders />
+            <PricingButtons activeTab={activeTab} func={setActiveTab} />
+            <HomeOwner />
+            <div>
+              <div className={activeTab === "yearly" ? "hidden" : "block"}>
+                <MontlyPricing />
+              </div>
+              <div className={activeTab === "monthly" ? "hidden" : "block"}>
+                <YearlyPricing />
+              </div>
+            </div>
+            <hr className='border-light-gray/20' />
+            <PricingLabels />
+          </div>
         </SeContainerPadding>
       </SeContainer>
     </section>

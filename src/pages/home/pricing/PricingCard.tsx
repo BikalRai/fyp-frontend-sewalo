@@ -1,14 +1,16 @@
-import { RxCross2 } from "react-icons/rx";
 import type { IPricingPlan } from "./MontlyPricing";
-import { LuCheck, LuCircleCheck } from "react-icons/lu";
+import { LuCheck } from "react-icons/lu";
+import { FaRegCircleCheck } from "react-icons/fa6";
+import { IoMdClose } from "react-icons/io";
+import SeButton from "@/components/button/SeButton";
 
 type CardDataProps = {
   cardData: IPricingPlan;
 };
 
-const MonthlyPricingCard = ({ cardData }: CardDataProps) => {
+const PricingCard = ({ cardData }: CardDataProps) => {
   return (
-    <div className='bg-light rounded-2xl p-8 grid gap-5 w-full max-w-90'>
+    <div className='bg-light rounded-2xl p-8 grid gap-5 w-full max-w-120'>
       <div className='grid gap-1'>
         <h3 className='font-bold text-text-dark leading-7'>{cardData.name}</h3>
         <p className='text-xs text-muted leading-4'>{cardData.subTitle}</p>
@@ -29,7 +31,7 @@ const MonthlyPricingCard = ({ cardData }: CardDataProps) => {
         <p className='text-xs text-muted leading-4'>{cardData.priceLabel}</p>
       </div>
       <div className='flex items-center gap-2 pt-6 border-t border-t-muted/30'>
-        <LuCircleCheck className='fill-accent w-4 h-4' />
+        <FaRegCircleCheck className='fill-accent w-4 h-4' />
         <p className='font-semibold text-sm leading-5 text-text-dark'>
           {cardData.leadDelivery}
         </p>
@@ -39,12 +41,12 @@ const MonthlyPricingCard = ({ cardData }: CardDataProps) => {
           <div key={i}>
             <div className='flex items-center gap-2'>
               {feature.included ? (
-                <LuCheck className='fill-accent' />
+                <LuCheck className='stroke-accent' />
               ) : (
-                <RxCross2 className='fill-accent' />
+                <IoMdClose className='fill-muted/60' />
               )}
               <p
-                className={`${feature.included ? "text-text-dark" : "text-muted"} text-sm leading-5`}
+                className={`${feature.included ? "text-text-dark" : "text-muted/60"} text-sm leading-5`}
               >
                 {feature.label}
               </p>
@@ -52,8 +54,23 @@ const MonthlyPricingCard = ({ cardData }: CardDataProps) => {
           </div>
         ))}
       </div>
+      <div>
+        {cardData.isPopular ? (
+          <SeButton
+            variant='accentLight'
+            btnText={cardData.ctaLabel}
+            styleClass='w-full'
+          />
+        ) : (
+          <SeButton
+            variant='outlineLight'
+            btnText={cardData.ctaLabel}
+            styleClass='w-full text-text-dark border-muted/40'
+          />
+        )}
+      </div>
     </div>
   );
 };
 
-export default MonthlyPricingCard;
+export default PricingCard;

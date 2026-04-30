@@ -1,21 +1,5 @@
+import type { IPricingPlan } from "./MontlyPricing";
 import PricingCard from "./PricingCard";
-
-export interface IPricingPlan {
-  id: number;
-  name: string;
-  subTitle: string;
-  price: null | number;
-  priceLabel: string;
-  leadDelivery: string;
-  isPopular?: boolean;
-  ctaLabel: string;
-  features: IPricingFeature[];
-}
-
-export interface IPricingFeature {
-  label: string;
-  included: boolean;
-}
 
 const pricingData: IPricingPlan[] = [
   {
@@ -40,8 +24,8 @@ const pricingData: IPricingPlan[] = [
     id: 2,
     name: "Pro",
     subTitle: "For active providers",
-    price: 399,
-    priceLabel: "Billed monthly",
+    price: 3899,
+    priceLabel: "Billed yearly",
     isPopular: true,
     leadDelivery: "Leads delivered in 5–10 min",
     ctaLabel: "Get started",
@@ -59,8 +43,8 @@ const pricingData: IPricingPlan[] = [
     id: 3,
     name: "Business",
     subTitle: "For established providers",
-    price: 799,
-    priceLabel: "Billed monthly",
+    price: 12299,
+    priceLabel: "Billed yearly",
     leadDelivery: "Leads delivered instantly",
     ctaLabel: "Get started",
     features: [
@@ -75,7 +59,7 @@ const pricingData: IPricingPlan[] = [
   },
 ];
 
-const MontlyPricing = () => {
+const YearlyPricing = () => {
   return (
     <div className='grid gap-6 md:flex md:flex-wrap md:justify-center lg:grid lg:grid-cols-3'>
       {pricingData.map((data) => (
@@ -85,4 +69,4 @@ const MontlyPricing = () => {
   );
 };
 
-export default MontlyPricing;
+export default YearlyPricing;
