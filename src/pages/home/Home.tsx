@@ -3,6 +3,7 @@ import SeAppLayout from "@/layouts/SeAppLayout";
 import BuiltDifferent from "./built-different/BuiltDifferent";
 import Pricing from "./pricing/Pricing";
 import Reviews from "./reviews/Reviews";
+import Faq from "./faq/Faq";
 
 const Home = () => {
   return (
@@ -11,6 +12,7 @@ const Home = () => {
       <BuiltDifferent />
       <Pricing />
       <Reviews />
+      <Faq />
     </SeAppLayout>
   );
 };
