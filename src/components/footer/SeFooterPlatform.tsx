@@ -10,7 +10,7 @@ const links = [
 
 const SeFooterPlatform = () => {
   return (
-    <div className="flex flex-col gap-4 md:ms-5">
+    <div className="flex flex-col gap-4 lg:ms-5">
       <SeFooterTitle title="Platform" />
       <div className="flex flex-col gap-3">
         {links.map((link, i) => (
