@@ -14,7 +14,7 @@ const cardData = [
     classify job complexity into Micro, Medium, or Major tiers.`,
   },
   {
-    id: 1,
+    id: 2,
     icon: IoLocationOutline,
     title: "5km Proximity Matching",
     description: `Find nearby professionals within a 5km radius for faster
@@ -38,12 +38,12 @@ const cardData = [
 
 const BuiltDifferent = () => {
   return (
-    <section className='bg-light'>
+    <section className="bg-light">
       <SeContainer>
-        <div className='py-25.5 px-6 md:px-8 lg:px-0'>
+        <div className="py-25.5 px-6 md:px-8 lg:px-0">
           {/* section heading and description */}
-          <div className='grid gap-4'>
-            <SeSectionHeader title='Built Different' />
+          <div className="grid gap-4">
+            <SeSectionHeader title="Built Different" />
             <SeParagraph
               title="Designed for Nepal's service economy, powered by modern
               technology"
@@ -51,8 +51,8 @@ const BuiltDifferent = () => {
           </div>
 
           {/* feature cards */}
-          <div className='flex items-center justify-center mt-16'>
-            <div className='grid md:grid-cols-2 gap-6 align-middle'>
+          <div className="flex items-center justify-center mt-16">
+            <div className="grid md:grid-cols-2 gap-6 align-middle">
               {cardData.map((data) => (
                 <FeatureCard
                   key={data.id}
