@@ -6,6 +6,8 @@ const SeInput = ({
   name,
   Icon,
   placeholderText,
+  registration,
+  error,
 }: IInput) => {
   return (
     <div className="grid gap-3">
@@ -20,8 +22,10 @@ const SeInput = ({
           id={name}
           name={name}
           placeholder={placeholderText}
+          {...registration}
         />
       </div>
+      {error && <span className="text-danger text-xs">{error}</span>}
     </div>
   );
 };

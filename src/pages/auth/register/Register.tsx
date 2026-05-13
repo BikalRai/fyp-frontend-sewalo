@@ -1,5 +1,5 @@
 import { logo } from "@/uitls/images";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import SeInput from "@/components/input/SeInput";
 import {
   LuArrowRight,
@@ -10,10 +10,51 @@ import {
   LuHouse,
 } from "react-icons/lu";
 import SeButton from "@/components/button/SeButton";
-import { useState } from "react";
+import { useForm, useWatch } from "react-hook-form";
+import { userRegisterBody, type UserRegisterType } from "@/types/user.types";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { toast } from "sonner";
+import { useRegister } from "@/hooks/mutations/useAuth";
+import axios from "axios";
 
 const Register = () => {
-  const [role, setRole] = useState<"help" | "provide" | null>("help");
+  const navigate = useNavigate();
+  const { mutate: registerUser, isPending } = useRegister();
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    setValue,
+    control,
+  } = useForm<UserRegisterType>({
+    resolver: zodResolver(userRegisterBody),
+    defaultValues: {
+      role: "CUSTOMER",
+    },
+  });
+
+  const selectedRole = useWatch({ control, name: "role" });
+
+  const handleRegister = (data: UserRegisterType) => {
+    registerUser(data, {
+      onSuccess: () => {
+        navigate("/auth/login");
+        toast.success("Account created. Please check your email.");
+      },
+      onError: (error) => {
+        if (axios.isAxiosError(error)) {
+          const message =
+            error.response?.data?.details ??
+            error.response?.data?.message ??
+            "Something went wrong.";
+          toast.error(message);
+        } else {
+          toast.error("Something went wrong.");
+        }
+      },
+    });
+  };
 
   return (
     <div className="w-full max-w-sm flex flex-col gap-6">
@@ -34,16 +75,16 @@ const Register = () => {
       <div className="flex gap-3">
         <button
           type="button"
-          onClick={() => setRole("help")}
+          onClick={() => setValue("role", "CUSTOMER")}
           className={`flex-1 flex flex-col gap-1 border rounded-xl p-4.5 text-left cursor-pointer transition-colors duration-200 ${
-            role === "help"
+            selectedRole === "CUSTOMER"
               ? "border-text-dark"
               : "border-gray-200 hover:border-gray-300"
           }`}
         >
           <div className="grid gap-2">
             <LuHouse
-              className={`text-base ${role === "help" ? "stroke-accent" : "stroke-muted"}`}
+              className={`text-base ${selectedRole === "CUSTOMER" ? "stroke-accent" : "stroke-muted"}`}
             />
             <div>
               <div className="text-sm font-medium text-text-dark leading-5">
@@ -56,16 +97,16 @@ const Register = () => {
 
         <button
           type="button"
-          onClick={() => setRole("provide")}
+          onClick={() => setValue("role", "PROVIDER")}
           className={`flex-1 flex flex-col gap-1 border rounded-xl p-4.5 text-left cursor-pointer transition-colors duration-200 ${
-            role === "provide"
+            selectedRole === "PROVIDER"
               ? "border-text-dark"
               : "border-gray-200 hover:border-gray-300"
           }`}
         >
           <div className="grid gap-2">
             <LuBriefcase
-              className={`text-base ${role === "provide" ? "stroke-accent" : "stroke-muted"}`}
+              className={`text-base ${selectedRole === "PROVIDER" ? "stroke-accent" : "stroke-muted"}`}
             />
             <div>
               <div className="text-sm font-medium text-text-dark leading-5">
@@ -78,7 +119,10 @@ const Register = () => {
       </div>
 
       {/* Form */}
-      <form className="flex flex-col gap-4">
+      <form
+        className="flex flex-col gap-4"
+        onSubmit={handleSubmit(handleRegister)}
+      >
         {/* Full name */}
         <SeInput
           type="text"
@@ -86,6 +130,8 @@ const Register = () => {
           name="fullName"
           placeholderText="Romesh Bhattarai"
           Icon={LuUser}
+          registration={register("fullName")}
+          error={errors.fullName?.message}
         />
 
         {/* Email */}
@@ -95,6 +141,8 @@ const Register = () => {
           name="email"
           placeholderText="you@example.com"
           Icon={LuMail}
+          registration={register("email")}
+          error={errors.email?.message}
         />
 
         {/* Password */}
@@ -104,6 +152,8 @@ const Register = () => {
           name="password"
           placeholderText="At least 8 characters"
           Icon={LuLock}
+          registration={register("password")}
+          error={errors.password?.message}
         />
 
         {/* Terms */}
@@ -132,9 +182,10 @@ const Register = () => {
 
         {/* Submit */}
         <SeButton
-          btnText="Create account"
+          btnText={isPending ? "Creating account..." : "Create account"}
           iconPosition="right"
           icon={<LuArrowRight />}
+          disabled={isPending}
         />
 
         {/* Divider */}
