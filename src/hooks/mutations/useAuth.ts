@@ -1,6 +1,8 @@
 import { authKeys } from "@/lib/queryKeys";
-import { registerUser } from "@/services/auth.service";
+import { googleAuth, loginUser, registerUser } from "@/services/auth.service";
+import { useAuthStore } from "@/store/authStore";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useNavigate } from "react-router-dom";
 
 export const useRegister = () => {
   const queryClient = useQueryClient();
@@ -16,10 +18,46 @@ export const useRegister = () => {
   });
 };
 
-// export const useLogin = () => {
-//     const queryClient = useQueryClient()
+export const useLogin = () => {
+  const queryClient = useQueryClient();
+  const setAuth = useAuthStore((state) => state.setAuth);
 
-//     return useMutation({
-//         mutationFn: login
-//     })
-// }
+  return useMutation({
+    mutationFn: loginUser,
+    onSuccess: (data) => {
+      setAuth(data.accessKey, data.role, data.userId, data.isActive);
+      queryClient.setQueryData(authKeys.currentUser(), data);
+    },
+    onError: (error) => {
+      console.error("Login failed", error);
+    },
+  });
+};
+
+export const useGoogleAuth = () => {
+  const queryClient = useQueryClient();
+  const navigate = useNavigate();
+  const setAuth = useAuthStore((state) => state.setAuth);
+
+  return useMutation({
+    mutationFn: (idToken: string) => googleAuth(idToken),
+    onSuccess: (data) => {
+      setAuth(
+        data.data.access_token,
+        data.data.role,
+        data.data.userId,
+        data.data.isActive,
+      );
+      queryClient.setQueryData(authKeys.currentUser(), data);
+
+      if (data.data.role === "PROVIDER") {
+        navigate("/provider/dashboard");
+      } else {
+        navigate("/customer/dashboard");
+      }
+    },
+    onError: (error) => {
+      console.error("Google OAuth failed: ", error);
+    },
+  });
+};

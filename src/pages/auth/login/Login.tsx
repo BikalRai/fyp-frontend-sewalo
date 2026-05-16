@@ -6,6 +6,11 @@ import { Link } from "react-router-dom";
 import SeInput from "@/components/input/SeInput";
 import { LuArrowRight, LuLock, LuMail } from "react-icons/lu";
 import SeButton from "@/components/button/SeButton";
+import { useLogin } from "@/hooks/mutations/useAuth";
+import { toast } from "sonner";
+import axios from "axios";
+import SeSpinner from "@/components/spinner/SeSpinner";
+import GoogleAuthButton from "@/components/button/GoogleAuthButton";
 
 const loginSchema = z.object({
   email: z.string().email("Enter a valid email"),
@@ -24,9 +29,26 @@ const Login = () => {
     resolver: zodResolver(loginSchema),
   });
 
-  const onSubmit = async (data: LoginFormData) => {
-    console.log(data);
-    // wire up your API call here later
+  const { mutate: loginUser, isPending } = useLogin();
+
+  const handleLogin = async (data: LoginFormData) => {
+    loginUser(data, {
+      onSuccess: () => {
+        toast.success("User authenticated!");
+      },
+      onError(error) {
+        if (axios.isAxiosError(error)) {
+          const message =
+            error.response?.data?.details ??
+            error.response?.data?.message ??
+            "something went wrong";
+          toast.error(message);
+        } else {
+          toast.error("Something went wrong");
+          console.error(error);
+        }
+      },
+    });
   };
 
   return (
@@ -46,7 +68,7 @@ const Login = () => {
 
       {/* Form */}
       <form
-        onSubmit={handleSubmit(onSubmit)}
+        onSubmit={handleSubmit(handleLogin)}
         className="flex flex-col gap-4 mt-6"
       >
         {/* Email */}
@@ -56,6 +78,8 @@ const Login = () => {
           name="email"
           placeholderText="you@example.com"
           Icon={LuMail}
+          registration={register("email")}
+          error={errors.email?.message}
         />
 
         {/* Password */}
@@ -65,6 +89,8 @@ const Login = () => {
           name="password"
           placeholderText="********"
           Icon={LuLock}
+          registration={register("password")}
+          error={errors.password?.message}
         />
 
         {/* Keep signed in */}
@@ -82,7 +108,8 @@ const Login = () => {
         <SeButton
           btnText="Log in"
           iconPosition="right"
-          icon={<LuArrowRight />}
+          icon={isPending ? <SeSpinner /> : <LuArrowRight />}
+          disabled={isSubmitting || isPending}
         />
 
         {/* Divider */}
@@ -93,17 +120,7 @@ const Login = () => {
         </div>
 
         {/* Google */}
-        <button
-          type="button"
-          className="w-full flex items-center justify-center gap-2 border border-gray-200 rounded-lg py-2.5 text-sm font-medium text-muted hover:bg-bg/50 transition-colors duration-300 cursor-pointer"
-        >
-          <img
-            src="https://www.svgrepo.com/show/475656/google-color.svg"
-            alt="Google"
-            className="w-4 h-4"
-          />
-          Continue with Google
-        </button>
+        <GoogleAuthButton label="Log in with Google" />
       </form>
 
       {/* Footer */}

@@ -49,7 +49,11 @@ const SeButton = ({
       type={type}
       onClick={clickFunc}
       disabled={disabled}
-      className={`${buttonStyles[size]} border rounded-lg font-semibold ${variantStlyes[variant]} flex items-center justify-center gap-2 hover:shadow-lg transition group cursor-pointer text-xs md:text-sm ${styleClass}`}
+      className={`${buttonStyles[size]} border rounded-lg font-semibold ${variantStlyes[variant]} flex items-center justify-center gap-2 hover:shadow-lg transition group cursor-pointer text-xs md:text-sm disabled:opacity-50 
+        disabled:cursor-not-allowed 
+        disabled:pointer-events-none 
+        disabled:shadow-none
+        ${!disabled ? "cursor-pointer" : ""} ${styleClass}`}
     >
       {iconIsLeft && icon && (
         <span className="group-hover:translate-x-2 transition-transform duration-300">

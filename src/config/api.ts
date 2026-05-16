@@ -1,3 +1,4 @@
+import { useAuthStore } from "@/store/authStore";
 import axios from "axios";
 
 const api = axios.create({
@@ -6,7 +7,7 @@ const api = axios.create({
 });
 
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem("accessKey");
+  const token = useAuthStore.getState().accessToken;
 
   if (token) config.headers["Authorization"] = `Bearer ${token}`;
 
@@ -36,11 +37,18 @@ api.interceptors.response.use(
           { withCredentials: true },
         );
 
-        localStorage.setItem("accessKey", data.accessToken);
+        const { setAuth, role, userId, isActive } = useAuthStore.getState();
+        setAuth(
+          data.data.access_token,
+          role ?? data.data.role,
+          userId ?? data.data.userId,
+          isActive ?? data.data.isActive,
+        );
         originalConfig.headers["Authorization"] = `Bearer ${data.accessToken}`;
 
         return api(originalConfig);
       } catch (refreshError) {
+        useAuthStore.getState().clearAuth();
         window.location.href = "/auth/login";
         return Promise.reject(refreshError);
       }
