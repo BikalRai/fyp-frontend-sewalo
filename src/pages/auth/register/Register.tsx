@@ -16,6 +16,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import { useRegister } from "@/hooks/mutations/useAuth";
 import axios from "axios";
+import SeSpinner from "@/components/spinner/SeSpinner";
+import GoogleAuthButton from "@/components/button/GoogleAuthButton";
 
 const Register = () => {
   const navigate = useNavigate();
@@ -24,7 +26,7 @@ const Register = () => {
   const {
     register,
     handleSubmit,
-    formState: { errors },
+    formState: { errors, isSubmitting },
     setValue,
     control,
   } = useForm<UserRegisterType>({
@@ -182,10 +184,10 @@ const Register = () => {
 
         {/* Submit */}
         <SeButton
-          btnText={isPending ? "Creating account..." : "Create account"}
+          btnText={isPending ? "Creating account " : "Create account"}
           iconPosition="right"
-          icon={<LuArrowRight />}
-          disabled={isPending}
+          icon={isPending ? <SeSpinner /> : <LuArrowRight />}
+          disabled={isSubmitting || isPending}
         />
 
         {/* Divider */}
@@ -196,17 +198,7 @@ const Register = () => {
         </div>
 
         {/* Google */}
-        <button
-          type="button"
-          className="w-full flex items-center justify-center gap-2 border border-gray-200 rounded-lg py-2.5 text-sm font-medium text-muted hover:bg-bg/50 transition-colors duration-300 cursor-pointer"
-        >
-          <img
-            src="https://www.svgrepo.com/show/475656/google-color.svg"
-            alt="Google"
-            className="w-4 h-4"
-          />
-          Continue with Google
-        </button>
+        <GoogleAuthButton label="Signup with Google" />
       </form>
 
       {/* Footer */}
