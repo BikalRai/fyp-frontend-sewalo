@@ -9,11 +9,13 @@ export interface IButtonProps {
     | "danger"
     | "accent"
     | "outlineLight"
+    | "tertiary"
     | "accentLight";
   size?: "sm" | "md" | "large";
   icon?: React.ReactElement;
   iconPosition?: "left" | "right";
   styleClass?: string;
+  className?: string;
 }
 
 const variantStlyes = {
@@ -23,6 +25,8 @@ const variantStlyes = {
   outline:
     "bg-transparent text-primary border-muted hover:bg-primary hover:text-light",
   outlineLight: "bg-transparent text-light border-light hover:bg-light/10",
+  tertiary:
+    "bg-transparent border-transparent text-text-dark hover:underline active:bg-muted/20 active:scale-95",
   danger: "bg-danger text-light border-danger hover:bg-soft-danger",
 };
 
@@ -42,6 +46,7 @@ const SeButton = ({
   icon,
   iconPosition,
   styleClass,
+  className,
 }: IButtonProps) => {
   const iconIsLeft = iconPosition === "left";
   return (
@@ -49,20 +54,20 @@ const SeButton = ({
       type={type}
       onClick={clickFunc}
       disabled={disabled}
-      className={`${buttonStyles[size]} border rounded-lg font-semibold ${variantStlyes[variant]} flex items-center justify-center gap-2 hover:shadow-lg transition group cursor-pointer text-xs md:text-sm disabled:opacity-50 
+      className={`${buttonStyles[size]} border rounded-lg font-semibold ${variantStlyes[variant]} flex items-center justify-center gap-2 ${variant === "tertiary" ? "" : "hover:shadow-sm"} transition group cursor-pointer text-xs md:text-sm disabled:bg-accent/40 
         disabled:cursor-not-allowed 
         disabled:pointer-events-none 
         disabled:shadow-none
-        ${!disabled ? "cursor-pointer" : ""} ${styleClass}`}
+        ${!disabled ? "cursor-pointer" : ""} ${styleClass} ${className}`}
     >
       {iconIsLeft && icon && (
-        <span className="group-hover:translate-x-2 transition-transform duration-300">
+        <span className="group-hover:-translate-x-1 transition-transform duration-300">
           {icon}
         </span>
       )}
       <span>{btnText}</span>
       {!iconIsLeft && icon && (
-        <span className="group-hover:translate-x-2 transition-transform duration-300">
+        <span className="group-hover:translate-x-1 transition-transform duration-300">
           {icon}
         </span>
       )}
