@@ -1,12 +1,16 @@
 import type { ISectionHeading } from "@/types/section.types";
 
-const SeSectionHeader = ({ title, variant = "normal" }: ISectionHeading) => {
+const SeSectionHeader = ({
+  title,
+  variant = "normal",
+  align = "center",
+}: ISectionHeading) => {
   return (
-    <h2
-      className={`${variant === "normal" ? "text-text-dark" : "text-light"} font-bold text-4xl text-center leading-10`}
+    <h1
+      className={`${variant === "normal" ? "text-text-dark" : "text-light"} font-bold text-4xl text-${align} leading-10`}
     >
       {title}
-    </h2>
+    </h1>
   );
 };
 

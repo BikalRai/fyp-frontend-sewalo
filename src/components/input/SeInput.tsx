@@ -21,9 +21,9 @@ const SeInput = ({
         {label}
       </label>
       <div className="border border-muted/30 p-3 rounded-xl flex items-center gap-2 focus-within:border-muted transition-colors duration-300">
-        <span>{<Icon className="stroke-muted w-4 h-4" />}</span>
+        <span>{Icon && <Icon className="stroke-muted w-4 h-4" />}</span>
         <input
-          className="border-0 outline-0 w-full text-sm"
+          className="border-0 outline-0 w-full text-sm placeholder:text-muted/50"
           type={isPassword ? (showPassword ? "text" : "password") : type}
           id={name}
           name={name}
