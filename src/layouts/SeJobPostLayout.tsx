@@ -16,6 +16,7 @@ import {
 import { Stepper } from "@mantine/core";
 import { useState } from "react";
 import { LuArrowLeft } from "react-icons/lu";
+import { useLocation, useNavigate } from "react-router-dom";
 
 const steps = [
   {
@@ -45,12 +46,29 @@ const SeJobPostLayout = () => {
   const [active, setActive] = useState(0);
   const selectedCategory = useJobPostStore((s) => s.selectedCategory);
   const urgency = useUrgencyStore((s) => s.urgency);
-  const { location, phoneNumber } = useLocationStore();
+  const { location: userLocation, phoneNumber } = useLocationStore();
   const selectedImages = useImageStore((s) => s.selectedImages);
+
+  const location = useLocation();
+  const navigate = useNavigate();
 
   const nextStep = () =>
     setActive((prev) => (prev === steps.length - 1 ? prev : prev + 1));
-  const prevStep = () => setActive((prev) => (prev === 0 ? prev : prev - 1));
+  const prevStep = () => {
+    if (active === 0 && location.pathname.includes("/onboarding")) {
+      navigate("/onboarding/address");
+      setActive((prev) => (prev === 0 ? prev : prev - 1));
+    } else {
+      if (!location.pathname.includes("/onboarding")) {
+        navigate(-1);
+      }
+      setActive((prev) => (prev === 0 ? prev : prev - 1));
+    }
+  };
+
+  const handleClickSkip = () => {
+    navigate("/dashboard");
+  };
 
   const handleSubmit = async () => {
     try {
@@ -58,9 +76,9 @@ const SeJobPostLayout = () => {
 
       formData.append("category", selectedCategory || "");
       formData.append("urgency", urgency || "");
-      formData.append("address", location.address);
-      formData.append("lat", String(location.lat));
-      formData.append("lng", String(location.lng));
+      formData.append("address", userLocation.address);
+      formData.append("lat", String(userLocation.lat));
+      formData.append("lng", String(userLocation.lng));
       formData.append("phoneNumber", phoneNumber);
 
       selectedImages.forEach((image) => {
@@ -93,7 +111,7 @@ const SeJobPostLayout = () => {
 
     if (active === 1) return urgency === null;
 
-    if (active === 2) return !location.address || !phoneNumber;
+    if (active === 2) return !userLocation.address || !phoneNumber;
 
     return false;
   };
@@ -142,12 +160,17 @@ const SeJobPostLayout = () => {
           </div>
 
           <div className="flex items-center mt-30">
-            <SeButton
-              variant="tertiary"
-              btnText="Previous"
-              clickFunc={prevStep}
-              className="flex-1"
-            />
+            {location.pathname.includes("/onboarding") ? (
+              <SeButton
+                variant="tertiary"
+                btnText="Previous"
+                clickFunc={prevStep}
+                className="flex-1"
+              />
+            ) : (
+              <SeButton btnText="Skip for now" clickFunc={handleClickSkip} />
+            )}
+
             <SeButton
               variant="accentLight"
               btnText={active === steps.length - 1 ? "Submit" : "Continue"}

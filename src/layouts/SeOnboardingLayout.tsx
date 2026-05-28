@@ -8,7 +8,7 @@ const SeOnboardingLayout = ({ children }: IContainerProp) => {
     <div className="min-h-screen flex flex-col">
       <div className="bg-bg/30 py-6">
         <div className="flex-1 flex w-full items-center justify-between">
-          <SeContainerMD>
+          <SeContainerMD className="px-5 lg:px-0">
             <div className="flex items-center justify-between">
               <div className="h-7">
                 <img src={logo} alt="Sewalo logo" className="w-full h-full" />
