@@ -26,7 +26,7 @@ const variantStlyes = {
     "bg-transparent text-primary border-muted hover:bg-primary hover:text-light",
   outlineLight: "bg-transparent text-light border-light hover:bg-light/10",
   tertiary:
-    "bg-transparent border-transparent text-text-dark hover:underline active:bg-muted/20 active:scale-95",
+    "bg-transparent border-transparent text-text-dark hover:underline active:scale-95",
   danger: "bg-danger text-light border-danger hover:bg-soft-danger",
 };
 
@@ -37,7 +37,7 @@ const buttonStyles = {
 };
 
 const SeButton = ({
-  type = "submit",
+  type = "button",
   btnText,
   clickFunc,
   disabled,

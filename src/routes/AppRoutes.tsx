@@ -1,9 +1,10 @@
+import CustomerOnboardingFlow from "@/layouts/CustomerOnboardingLayout";
+import ProviderOnboardingFlow from "@/layouts/ProviderOnboardingFlow";
 import Auth from "@/pages/auth/Auth";
 import Login from "@/pages/auth/login/Login";
 import Register from "@/pages/auth/register/Register";
 import JobPost from "@/pages/customer/job/JobPost";
 import Home from "@/pages/home/Home";
-import AddressForm from "@/pages/onboarding/user/AddressForm";
 import VerifyAccount from "@/pages/onboarding/VerifyAccount";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 
@@ -31,8 +32,12 @@ const router = createBrowserRouter([
     element: <VerifyAccount />,
   },
   {
-    path: "/customer-address",
-    element: <AddressForm />,
+    path: "/customer-onboarding",
+    element: <CustomerOnboardingFlow />,
+  },
+  {
+    path: "/provider-onboarding",
+    element: <ProviderOnboardingFlow />,
   },
   {
     path: "/post-job",

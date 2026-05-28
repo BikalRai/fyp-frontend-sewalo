@@ -1,3 +1,5 @@
+import type { ComponentType } from "react";
+
 export interface IJobCategoryCard {
   Icon: React.ElementType;
   title: string;
@@ -8,4 +10,10 @@ export interface IJobCategoryCard {
 export interface IJobCategoryProps {
   Icon: React.ElementType;
   title: string;
+}
+
+export interface JobStep {
+  title: string;
+  description: string;
+  component: ComponentType;
 }
