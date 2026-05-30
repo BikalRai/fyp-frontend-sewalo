@@ -2,15 +2,80 @@ import SeButton from "@/components/button/SeButton";
 import SeContainerMD from "@/components/container/SeContainerMD";
 import SeSectionHeader from "@/components/heading/SeSectionHeader";
 import SeOTPInput from "@/components/input/SeOTPInput";
+import { useResendCode, useVerify } from "@/hooks/mutations/useAuth";
 import SeOnboardingLayout from "@/layouts/SeOnboardingLayout";
+import { useAuthStore } from "@/store/authStore";
+import axios from "axios";
+import { useState } from "react";
 import { LuArrowLeft, LuArrowRight, LuMail } from "react-icons/lu";
+import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
+import { SyncLoader } from "react-spinners";
 
 const VerifyAccount = () => {
+  const [otpToken, setOtpToken] = useState<string>("");
+  const navigate = useNavigate();
+  const { mutate: resendCode } = useResendCode();
+  const { mutate: verifyAccount, isPending } = useVerify();
+
+  const userId = useAuthStore((state) => state.userId);
+
+  const handleResendCode = () => {
+    if (!userId) {
+      console.error("No user found in store");
+      return;
+    }
+
+    resendCode(userId, {
+      onSuccess: () => {
+        toast.success("Verification code has been sent to your email.");
+      },
+      onError(error) {
+        if (axios.isAxiosError(error)) {
+          const message =
+            error.response?.data?.details ??
+            error.response?.data?.message ??
+            "Something went wrong";
+          toast.error(message);
+        } else {
+          toast.error("Something went wrong");
+          console.error(error);
+        }
+      },
+    });
+  };
+
+  const handleVerification = (e: React.SubmitEvent) => {
+    e.preventDefault();
+    console.log("token being submitted", otpToken);
+    verifyAccount(otpToken, {
+      onSuccess: () => {
+        toast.success("Account verified.");
+        setOtpToken("");
+      },
+      onError(error) {
+        if (axios.isAxiosError(error)) {
+          const message =
+            error.response?.data?.details ??
+            error.response?.data?.message ??
+            "something went wrong";
+          toast.error(message);
+        } else {
+          toast.error("Something went wrong");
+          console.error(error);
+        }
+      },
+    });
+  };
+
   return (
     <SeOnboardingLayout>
       {/* <div className="flex-1 flex w-full items-center justify-between"> */}
       <SeContainerMD>
-        <form className="w-full flex flex-col items-center ">
+        <form
+          className="w-full flex flex-col items-center mt-40"
+          onSubmit={handleVerification}
+        >
           <div className="flex flex-col items-center gap-5">
             <div className="w-16 h-16 bg-accent/20 rounded-2xl flex items-center justify-center">
               <LuMail className="stroke-accent h-7 w-7" />
@@ -24,24 +89,36 @@ const VerifyAccount = () => {
             </h3>
           </div>
           <div className="w-full grid gap-5 mt-5">
-            <SeOTPInput onComplete={() => {}} />
+            <SeOTPInput onComplete={(val) => setOtpToken(val)} />
             <div className="text-sm flex items-center justify-center gap-2">
               <span className="text-muted">Didn't get it?</span>
-              <button className="text-text-dark font-medium cursor-pointer hover:underline">
+              <button
+                type="button"
+                onClick={handleResendCode}
+                className="text-text-dark font-medium cursor-pointer hover:underline"
+              >
                 Resend code
               </button>
             </div>
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between mt-20">
               <SeButton
+                type="button"
                 variant="tertiary"
                 btnText="Back"
                 icon={<LuArrowLeft />}
                 iconPosition="left"
+                clickFunc={() => navigate("/auth/login")}
               />
               <SeButton
                 variant="primary"
-                btnText="Verify & continue"
-                icon={<LuArrowRight />}
+                btnText={`${isPending ? "Verifying" : "Verify & continue"}`}
+                icon={
+                  isPending ? (
+                    <SyncLoader size={3} color="#f9fafb" />
+                  ) : (
+                    <LuArrowRight />
+                  )
+                }
                 iconPosition="right"
               />
             </div>

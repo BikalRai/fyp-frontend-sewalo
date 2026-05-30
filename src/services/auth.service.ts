@@ -10,8 +10,7 @@ export const registerUser = async (
   payload: UserRegisterType,
 ): Promise<UserResponseType> => {
   const { data } = await api.post("/auth/register", payload);
-
-  return data;
+  return data.data;
 };
 
 export const loginUser = async (
@@ -19,7 +18,9 @@ export const loginUser = async (
 ): Promise<AuthReponseType> => {
   const { data } = await api.post("/auth/login", payload);
 
-  return data;
+  const res: AuthReponseType = data.data;
+
+  return res;
 };
 
 export const googleAuth = async (idToken: string) => {
@@ -27,7 +28,19 @@ export const googleAuth = async (idToken: string) => {
     idToken,
   });
 
-  console.log(res, "Google RESPONSE");
-
   return res.data;
+};
+
+export const verifyAccount = async (token: string) => {
+  const { data } = await api.post("/auth/verify-account", {
+    otpToken: token,
+  });
+
+  return data;
+};
+
+export const resendVerificationCode = async (userId: string) => {
+  const { data } = await api.post("/auth/resend-code", { userId });
+
+  return data;
 };

@@ -6,7 +6,33 @@ import Register from "@/pages/auth/register/Register";
 import JobPost from "@/pages/customer/job/JobPost";
 import Home from "@/pages/home/Home";
 import VerifyAccount from "@/pages/onboarding/VerifyAccount";
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import { useAuthStore } from "@/store/authStore";
+import {
+  createBrowserRouter,
+  Navigate,
+  Outlet,
+  RouterProvider,
+} from "react-router-dom";
+
+interface RequireAuthProps {
+  allowedRoles?: string[];
+}
+
+export const RequireAuth = ({ allowedRoles }: RequireAuthProps) => {
+  const { accessToken, role } = useAuthStore();
+
+  // verify if logged in
+  if (!accessToken) {
+    return <Navigate to="/auth/login" replace />;
+  }
+
+  // Bounce to safe fallback
+  if (allowedRoles && role && !allowedRoles.includes(role)) {
+    return <Navigate to="/dashboard" replace />;
+  }
+
+  return <Outlet />;
+};
 
 const router = createBrowserRouter([
   {
@@ -27,9 +53,15 @@ const router = createBrowserRouter([
       },
     ],
   },
+
   {
-    path: "/verify",
-    element: <VerifyAccount />,
+    element: <RequireAuth allowedRoles={["PROVIDER", "CUSTOMER"]} />,
+    children: [
+      {
+        path: "/auth/verify",
+        element: <VerifyAccount />,
+      },
+    ],
   },
   {
     path: "/customer-onboarding",

@@ -1,8 +1,10 @@
 import { z } from "zod";
 
-export const requiredString = (label: string) =>
+export const requiredString = (label?: string) =>
   z
-    .string({ error: `Provide string value for ${label}` })
+    .string({
+      error: `${label ? `Provide string value for ${label}` : "Provide a string value"}`,
+    })
     .nonempty()
     .nonoptional();
 

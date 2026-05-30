@@ -26,6 +26,32 @@ export const userLoginBody = z.object({
 export type UserLoginType = z.infer<typeof userLoginBody>;
 
 export const UserResponse = z.object({
+  access_token: z.string(),
+  user: z.object({
+    id: z.string().uuid(),
+    fullName: z.string(),
+    email: z.string().email(),
+    role: RoleEnumSchema,
+    createdAt: z.string().datetime(),
+    isActive: z.boolean(),
+    accountLocked: z.boolean(),
+    lockedAt: z.string().datetime(),
+  }),
+});
+
+export type UserResponseType = z.infer<typeof UserResponse>;
+
+export const AuthReponse = z.object({
+  access_token: z.string(),
+  role: RoleEnumSchema,
+  userId: z.string().uuid(),
+  isActive: z.boolean(),
+  isOnBoarded: z.boolean(),
+});
+
+export type AuthReponseType = z.infer<typeof AuthReponse>;
+
+export const UserProfileSchema = z.object({
   id: z.string().uuid(),
   fullName: z.string(),
   email: z.string().email(),
@@ -33,16 +59,7 @@ export const UserResponse = z.object({
   createdAt: z.string().datetime(),
   isActive: z.boolean(),
   accountLocked: z.boolean(),
-  lockedAt: z.string().datetime(),
+  lockedAt: z.string().datetime().nullable(),
 });
 
-export type UserResponseType = z.infer<typeof UserResponse>;
-
-export const AuthReponse = z.object({
-  accessKey: z.string(),
-  role: RoleEnumSchema,
-  userId: z.string().uuid(),
-  isActive: z.boolean(),
-});
-
-export type AuthReponseType = z.infer<typeof AuthReponse>;
+export type UserProfileType = z.infer<typeof UserProfileSchema>;
