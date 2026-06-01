@@ -37,7 +37,7 @@ const buttonStyles = {
 };
 
 const SeButton = ({
-  type = "button",
+  type = "submit",
   btnText,
   clickFunc,
   disabled,
@@ -54,7 +54,7 @@ const SeButton = ({
       type={type}
       onClick={clickFunc}
       disabled={disabled}
-      className={`${buttonStyles[size]} border rounded-lg font-semibold ${variantStlyes[variant]} flex items-center justify-center gap-2 ${variant === "tertiary" ? "" : "hover:shadow-sm"} transition group cursor-pointer text-xs md:text-sm disabled:bg-accent/40 
+      className={`${buttonStyles[size]} border rounded-lg font-semibold ${variantStlyes[variant]} flex items-center justify-center gap-2 active:shadow-lg ${variant === "tertiary" ? "" : "hover:shadow-sm"} transition group cursor-pointer text-xs md:text-sm disabled:bg-accent/40 
         disabled:cursor-not-allowed 
         disabled:pointer-events-none 
         disabled:shadow-none

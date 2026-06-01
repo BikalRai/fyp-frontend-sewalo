@@ -44,7 +44,8 @@ api.interceptors.response.use(
           userId ?? data.data.userId,
           isActive ?? data.data.isActive,
         );
-        originalConfig.headers["Authorization"] = `Bearer ${data.accessToken}`;
+        originalConfig.headers["Authorization"] =
+          `Bearer ${data.data.access_token}`;
 
         return api(originalConfig);
       } catch (refreshError) {

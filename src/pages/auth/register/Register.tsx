@@ -41,7 +41,7 @@ const Register = () => {
   const handleRegister = (data: UserRegisterType) => {
     registerUser(data, {
       onSuccess: () => {
-        navigate("/auth/login");
+        navigate("/auth/verify");
         toast.success("Account created. Please check your email.");
       },
       onError: (error) => {
@@ -130,7 +130,7 @@ const Register = () => {
           type="text"
           label="Full name"
           name="fullName"
-          placeholderText="Romesh Bhattarai"
+          placeholderText="Ramesh Bhattarai"
           Icon={LuUser}
           registration={register("fullName")}
           error={errors.fullName?.message}
