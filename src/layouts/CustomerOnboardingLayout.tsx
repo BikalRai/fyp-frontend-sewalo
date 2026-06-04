@@ -28,6 +28,10 @@ import {
 } from "@/store/jobStore";
 
 import type { JobStep } from "@/types/job.types";
+import {
+  useUpdateUserAddress,
+  useUserProfile,
+} from "@/hooks/mutations/useUser";
 
 // ─── Step definitions ────────────────────────────────────────────────────────
 
@@ -77,6 +81,10 @@ const CustomerOnboardingFlow = () => {
   const selectedImages = useImageStore((s) => s.selectedImages);
 
   const navigate = useNavigate();
+
+  const { data: user } = useUserProfile();
+  const updateAddressMutation = useUpdateUserAddress();
+  const { location } = useLocationStore();
 
   // ── Navigation ─────────────────────────────────────────────────────────────
 
@@ -159,6 +167,32 @@ const CustomerOnboardingFlow = () => {
     ? ADDRESS_STEP.description
     : currentJobStep!.description;
 
+  const handleAddressSubmit = async () => {
+    if (!user?.id) {
+      console.error("Cannot save address: User ID is missing.");
+      return;
+    }
+
+    try {
+      // We use mutateAsync to pause execution until the server responds
+      await updateAddressMutation.mutateAsync({
+        id: user.id,
+        updateData: {
+          lat: location.lat,
+          lng: location.lng,
+          address: location.address,
+        },
+      });
+
+      // If we reach this line, the server successfully updated the address.
+      // Now we can safely move them to the first job posting step.
+      nextStep();
+    } catch (error) {
+      // The mutation failed. The user stays on Step 0.
+      console.error("Failed to update address", error);
+      // Tip: This is a great place to trigger a Toast notification (e.g., toast.error("Failed to save address"))
+    }
+  };
   return (
     <div>
       <SeOnboardingLayout>
@@ -208,7 +242,7 @@ const CustomerOnboardingFlow = () => {
                   btnText={isLastStep ? "Submit" : "Continue"}
                   icon={isLastStep ? undefined : <LuArrowRight />}
                   iconPosition="right"
-                  clickFunc={isLastStep ? handleSubmit : nextStep}
+                  clickFunc={handleAddressSubmit}
                   // className="flex-1"
                   disabled={isContinueDisabled()}
                 />

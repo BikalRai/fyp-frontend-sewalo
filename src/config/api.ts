@@ -9,7 +9,17 @@ const api = axios.create({
 api.interceptors.request.use((config) => {
   const token = useAuthStore.getState().accessToken;
 
-  if (token) config.headers["Authorization"] = `Bearer ${token}`;
+  // 1. Define the endpoints that should NEVER receive an Authorization header
+  const isPublicRoute =
+    config.url === "/auth/login" ||
+    config.url === "/auth/register" ||
+    config.url === "/auth/google" ||
+    config.url?.startsWith("/oauth2/");
+
+  // 2. Only attach the token if we have one AND it's not a public route
+  if (token && !isPublicRoute) {
+    config.headers["Authorization"] = `Bearer ${token}`;
+  }
 
   return config;
 });

@@ -1,15 +1,3 @@
-/**
- * AddressFormStep
- *
- * Contains ONLY the form body of the original AddressForm:
- *   - search bar
- *   - map (click + drag + fly-to)
- *   - detected address display
- *
- * Everything related to layout (SeOnboardingLayout, SeContainerMD, SeStepper,
- * step counter, navigation buttons) has been removed — the parent
- * SeOnboardingFlow owns all of that.
- */
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useLocationStore } from "@/store/jobStore";
 import {

@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import SeContainer from "../container/SeContainer";
 import SeNavLink from "./SeNavLink";
 import SeMMobileNavLink from "./SeMMobileNavLink";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 export interface INavbarProps {
   isOpen: boolean;
@@ -26,6 +26,8 @@ const SeAppNavbar = () => {
   const [scrolled, setScrolled] = useState<boolean>(false);
 
   const [activeLink, setActiveLink] = useState<string>("/");
+
+  const navigate = useNavigate();
 
   const handleToggleNav = () => {
     setIsMenuOpen((prev) => !prev);
@@ -82,7 +84,10 @@ const SeAppNavbar = () => {
             <Link to={`/auth/login`}>
               <SeButton btnText="Log in" variant="outline" />
             </Link>
-            <SeButton btnText="Get Started" />
+            <SeButton
+              btnText="Get Started"
+              clickFunc={() => navigate("/auth/register")}
+            />
           </div>
 
           <button
@@ -131,8 +136,15 @@ const SeAppNavbar = () => {
                 ))}
               </div>
               <div className="px-6 py-6 border-t border-muted/20 flex flex-col gap-3">
-                <SeButton btnText="Log in" variant="outline" />
-                <SeButton btnText="Get Started" />
+                <SeButton
+                  btnText="Log in"
+                  variant="outline"
+                  clickFunc={() => navigate("/auth/login")}
+                />
+                <SeButton
+                  btnText="Get Started"
+                  clickFunc={() => navigate("/auth/register")}
+                />
               </div>
             </div>
           </div>

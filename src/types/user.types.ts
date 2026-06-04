@@ -5,15 +5,17 @@ import {
 } from "@/schemas/zod.schema";
 import { z } from "zod";
 
-export const RoleEnumSchema = z.enum(["CUSTOMER", "PROVIDER"], {
+export const roleEnumSchema = z.enum(["CUSTOMER", "PROVIDER"], {
   error: "Value of CUSTOMER / PROVIDER only",
 });
+
+export type RoleType = z.infer<typeof roleEnumSchema>;
 
 export const userRegisterBody = z.object({
   fullName: requiredString("full name"),
   email: requiredEmail(),
   password: requiredPassword(),
-  role: RoleEnumSchema.nonoptional(),
+  role: roleEnumSchema.nonoptional(),
 });
 
 export type UserRegisterType = z.infer<typeof userRegisterBody>;
@@ -31,11 +33,12 @@ export const UserResponse = z.object({
     id: z.string().uuid(),
     fullName: z.string(),
     email: z.string().email(),
-    role: RoleEnumSchema,
+    role: roleEnumSchema,
     createdAt: z.string().datetime(),
     isActive: z.boolean(),
     accountLocked: z.boolean(),
     lockedAt: z.string().datetime(),
+    isOnboarded: z.boolean(),
   }),
 });
 
@@ -43,10 +46,10 @@ export type UserResponseType = z.infer<typeof UserResponse>;
 
 export const AuthReponse = z.object({
   access_token: z.string(),
-  role: RoleEnumSchema,
+  role: roleEnumSchema,
   userId: z.string().uuid(),
   isActive: z.boolean(),
-  isOnBoarded: z.boolean(),
+  isOnboarded: z.boolean(),
 });
 
 export type AuthReponseType = z.infer<typeof AuthReponse>;
@@ -55,11 +58,37 @@ export const UserProfileSchema = z.object({
   id: z.string().uuid(),
   fullName: z.string(),
   email: z.string().email(),
-  role: RoleEnumSchema,
+  role: roleEnumSchema,
   createdAt: z.string().datetime(),
   isActive: z.boolean(),
   accountLocked: z.boolean(),
+  isOnboarded: z.boolean(),
   lockedAt: z.string().datetime().nullable(),
 });
 
 export type UserProfileType = z.infer<typeof UserProfileSchema>;
+
+export const UserAddressSchema = z.object({
+  id: z.string(),
+  latitude: z.number(),
+  longitude: z.number(),
+  address: z.string(),
+  createdAt: z.string().datetime(),
+  updatedAt: z.string().datetime(),
+  user: UserProfileSchema,
+});
+
+export type UserAddressType = z.infer<typeof UserAddressSchema>;
+
+export const UserUpdateAddressPayload = z.object({
+  lng: z.number().nonoptional(),
+  lat: z.number().nonoptional(),
+  address: z.string().nonoptional(),
+});
+
+export type UserUpdateAddressPayload = z.infer<typeof UserUpdateAddressPayload>;
+
+export interface UpdateUserAddressParams {
+  id: string;
+  updateData: UserUpdateAddressPayload;
+}

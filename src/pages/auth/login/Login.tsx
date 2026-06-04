@@ -11,6 +11,7 @@ import { toast } from "sonner";
 import axios from "axios";
 import SeSpinner from "@/components/spinner/SeSpinner";
 import GoogleAuthButton from "@/components/button/GoogleAuthButton";
+import { RingLoader } from "react-spinners";
 
 const loginSchema = z.object({
   email: z.string().email("Enter a valid email"),
@@ -50,6 +51,10 @@ const Login = () => {
       },
     });
   };
+
+  if (isPending || isSubmitting) {
+    return <RingLoader />;
+  }
 
   return (
     <div className="w-full max-w-sm flex flex-col gap-6">
