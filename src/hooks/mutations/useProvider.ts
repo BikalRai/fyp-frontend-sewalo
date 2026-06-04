@@ -3,7 +3,7 @@ import { updateProviderPersonalDetails } from "@/services/provider.service";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
-export const useUpdatePersonal = () => {
+export const useUpdateProviderPersonal = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
