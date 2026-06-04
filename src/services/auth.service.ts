@@ -1,4 +1,5 @@
 import { api } from "@/config/api";
+import type { RoleFormType } from "@/pages/auth/GoogleAuthSetRole";
 import type {
   UserResponseType,
   UserLoginType,
@@ -29,6 +30,12 @@ export const googleAuth = async (idToken: string) => {
   });
 
   return res.data;
+};
+
+export const googleAuthSetRole = async (payload: RoleFormType) => {
+  const res = await api.post("/auth/google/set-role", payload);
+
+  return res.data.data;
 };
 
 export const verifyAccount = async (token: string) => {

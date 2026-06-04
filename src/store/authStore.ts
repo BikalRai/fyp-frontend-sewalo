@@ -6,13 +6,13 @@ interface AuthState {
   role: string | null;
   userId: string | null;
   isActive: boolean | null;
-  isOnBoarded: boolean | null;
+  isOnboarded: boolean | null;
   setAuth: (
     accessToken: string,
     role: string,
     userId: string,
     isActive: boolean,
-    isOnBoarded?: boolean,
+    isOnboarded?: boolean,
   ) => void;
   clearAuth: () => void;
 }
@@ -24,14 +24,14 @@ export const useAuthStore = create<AuthState>()(
       role: null,
       userId: null,
       isActive: null,
-      isOnBoarded: null,
-      setAuth: (accessToken, role, userId, isActive, isOnBoarded) =>
+      isOnboarded: null,
+      setAuth: (accessToken, role, userId, isActive, isOnboarded) =>
         set({
           accessToken,
           role,
           userId,
           isActive,
-          isOnBoarded,
+          isOnboarded,
         }),
       clearAuth: () =>
         set({
@@ -39,7 +39,7 @@ export const useAuthStore = create<AuthState>()(
           role: null,
           userId: null,
           isActive: null,
-          isOnBoarded: null,
+          isOnboarded: null,
         }),
     }),
     {
