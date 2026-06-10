@@ -3,6 +3,7 @@ import { create } from "zustand";
 export interface JobPostState {
   selectedCategory: string | null;
   setSelectedCategory: (val: string | null) => void;
+  reset: () => void;
 }
 
 export const useJobPostStore = create<JobPostState>((set) => ({
@@ -14,6 +15,7 @@ export const useJobPostStore = create<JobPostState>((set) => ({
 export interface UrgencyState {
   urgency: string | null;
   setUrgency: (val: string | null) => void;
+  reset: () => void;
 }
 
 export const useUrgencyStore = create<UrgencyState>((set) => ({
@@ -58,6 +60,7 @@ export interface LocationState {
   setLocation: (lat: number, lng: number, address?: string) => void;
   setAddress: (address: string) => void;
   setPhoneNumber: (phoneNumber: string) => void;
+  reset: () => void;
 }
 
 export const useLocationStore = create<LocationState>((set) => ({

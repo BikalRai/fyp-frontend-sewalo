@@ -1,10 +1,11 @@
-import CustomerOnboardingFlow from "@/layouts/CustomerOnboardingLayout";
+import CustomerOnboarding from "@/layouts/CustomerOnboarding";
 import ProviderOnboardingFlow from "@/layouts/ProviderOnboardingFlow";
 import Auth from "@/pages/auth/Auth";
 import GoogleAuthSetRole from "@/pages/auth/GoogleAuthSetRole";
 import Login from "@/pages/auth/login/Login";
 import Register from "@/pages/auth/register/Register";
 import JobPost from "@/pages/customer/job/JobPost";
+import Dashboard from "@/pages/Dashboard";
 import Home from "@/pages/home/Home";
 import VerifyAccount from "@/pages/onboarding/VerifyAccount";
 import { useAuthStore } from "@/store/authStore";
@@ -92,19 +93,30 @@ const router = createBrowserRouter([
         path: "/auth/verify",
         element: <VerifyAccount />,
       },
+      {
+        path: "/dashboard",
+        element: <Dashboard />,
+      },
     ],
   },
   {
-    path: "/customer-onboarding",
-    element: <CustomerOnboardingFlow />,
+    element: <RequireAuth allowedRoles={["CUSTOMER"]} />,
+    children: [
+      { path: "/customer-onboarding", element: <CustomerOnboarding /> },
+      {
+        path: "/post-job",
+        element: <JobPost />,
+      },
+    ],
   },
   {
-    path: "/provider-onboarding",
-    element: <ProviderOnboardingFlow />,
-  },
-  {
-    path: "/post-job",
-    element: <JobPost />,
+    element: <RequireAuth allowedRoles={["PROVIDER"]} />,
+    children: [
+      {
+        path: "/provider-onboarding",
+        element: <ProviderOnboardingFlow />,
+      },
+    ],
   },
 ]);
 

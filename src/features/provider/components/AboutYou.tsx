@@ -75,8 +75,8 @@ const AboutYou = () => {
             Rs.
           </span>
           <input
-            type="number"
-            {...register("startingPrice")} // Standard input, so we use register
+            type="string"
+            {...register("startingRate")} // Standard input, so we use register
             placeholder="500"
             className="w-full pl-12 pr-4 py-3 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-slate-400 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
           />

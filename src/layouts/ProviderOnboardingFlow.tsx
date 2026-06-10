@@ -9,7 +9,7 @@ import {
   type IProviderStep,
   type MasterProviderType,
 } from "@/types/provider.types";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { LuArrowLeft, LuArrowRight } from "react-icons/lu";
 import SeOnboardingLayout from "./SeOnboardingLayout";
 import SeSectionHeader from "@/components/heading/SeSectionHeader";
@@ -18,6 +18,14 @@ import { FormProvider, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Services from "@/features/provider/components/Services";
 import PreviewProfile from "@/features/provider/components/PreviewProfile";
+import { useUpdateProviderPersonal } from "@/hooks/mutations/useProvider";
+import { uploadToCloudinary } from "@/lib/uploadImage";
+import { toast } from "sonner";
+import axios from "axios";
+import SeSpinner from "@/components/spinner/SeSpinner";
+import { useNavigate } from "react-router-dom";
+import { RingLoader } from "react-spinners";
+import { useUserProfile } from "@/hooks/mutations/useUser";
 
 const steps: IProviderStep[] = [
   {
@@ -58,15 +66,25 @@ const TOTAL_STEPS = steps.length;
 const ProviderOnboardingFlow = () => {
   const [active, setActive] = useState<number>(0);
 
+  const { data: user } = useUserProfile();
+
   const methods = useForm({
     resolver: zodResolver(masterProviderSchema),
     mode: "onTouched",
   });
 
+  const { mutate: updateProviderProfile, isPending } =
+    useUpdateProviderPersonal();
+
   const nextStep = async (): Promise<void> => {
     const currentStepFields = steps[active].fields;
 
     const stepIsValid = await methods.trigger(currentStepFields);
+
+    if (!stepIsValid) {
+      // This will tell us EXACTLY what Zod is complaining about
+      console.log("Zod Errors:", methods.formState.errors);
+    }
 
     if (stepIsValid) {
       setActive((prev) => (prev < TOTAL_STEPS - 1 ? prev + 1 : prev));
@@ -77,8 +95,44 @@ const ProviderOnboardingFlow = () => {
     setActive((prev) => (prev > 0 ? prev - 1 : prev));
   };
 
-  const submitHandler = (data: MasterProviderType) => {
-    console.log(data);
+  const navigate = useNavigate();
+
+  const submitHandler = async (data: MasterProviderType) => {
+    try {
+      let finalImageUrl = data.imageUrl;
+
+      if (data.imageUrl instanceof File) {
+        finalImageUrl = await uploadToCloudinary(data.imageUrl);
+      }
+
+      const finalPayload = {
+        ...data,
+        imageUrl: finalImageUrl,
+      };
+
+      updateProviderProfile(finalPayload, {
+        onSuccess: (response) => {
+          toast.success("Updated profile.");
+
+          if (response?.user?.onboarded) {
+            navigate("/dashboard");
+          }
+        },
+        onError: (error) => {
+          if (axios.isAxiosError(error)) {
+            const message =
+              error.response?.data?.details ??
+              error.response?.data?.message ??
+              "Something went wrong.";
+            toast.error(message);
+          } else {
+            toast.error("Something went wrong.");
+          }
+        },
+      });
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   const isLastStep: boolean = active === TOTAL_STEPS - 1;
@@ -90,6 +144,12 @@ const ProviderOnboardingFlow = () => {
   const stepTitle: string = currentStepComponent.title;
 
   const stepDescription: string = currentStepComponent.description;
+
+  useEffect(() => {
+    if (user?.onboarded) {
+      navigate("/dashboard");
+    }
+  }, []);
 
   return (
     <FormProvider {...methods}>
@@ -121,7 +181,13 @@ const ProviderOnboardingFlow = () => {
                     className="h-8 max-h-8"
                   />
                 </div>
-                <div>{StepComponent && <StepComponent />}</div>
+                <div>
+                  {isPending ? (
+                    <RingLoader />
+                  ) : (
+                    StepComponent && <StepComponent />
+                  )}
+                </div>
               </div>
 
               {/* navigation */}
@@ -133,6 +199,7 @@ const ProviderOnboardingFlow = () => {
                 {/* Only show Back button if we are past the first step */}
                 {active > 0 && (
                   <SeButton
+                    type="button"
                     btnText="Back"
                     variant="tertiary"
                     iconPosition="left"
@@ -146,7 +213,7 @@ const ProviderOnboardingFlow = () => {
                   btnText={isLastStep ? "Submit" : "Continue"}
                   variant="primary"
                   iconPosition="right"
-                  icon={isLastStep ? undefined : <LuArrowRight />}
+                  icon={isPending ? <SeSpinner /> : <LuArrowRight />}
                   clickFunc={nextStep}
                 />
               </div>
