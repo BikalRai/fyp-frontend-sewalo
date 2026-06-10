@@ -8,9 +8,11 @@ const ProviderUploadImage = () => {
   const currentImage = watch("imageUrl");
 
   // 2. Initialize preview with a string if one already exists from the DB
-  const [preview, setPreview] = useState<string | null>(
-    typeof currentImage === "string" ? currentImage : null,
-  );
+  const [preview, setPreview] = useState<string | null>(() => {
+    if (typeof currentImage === "string") return currentImage;
+    if (currentImage instanceof File) return URL.createObjectURL(currentImage);
+    return null;
+  });
 
   // 3. Intercept the file selection (Fixes the ESLint error!)
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {

@@ -62,8 +62,11 @@ export const UserProfileSchema = z.object({
   createdAt: z.string().datetime(),
   isActive: z.boolean(),
   accountLocked: z.boolean(),
-  isOnboarded: z.boolean(),
+  onboarded: z.boolean(),
   lockedAt: z.string().datetime().nullable(),
+  address: z.string(),
+  lat: z.number(),
+  lng: z.number(),
 });
 
 export type UserProfileType = z.infer<typeof UserProfileSchema>;

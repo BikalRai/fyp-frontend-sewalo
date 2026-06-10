@@ -6,11 +6,14 @@ import { useResendCode, useVerify } from "@/hooks/mutations/useAuth";
 import SeOnboardingLayout from "@/layouts/SeOnboardingLayout";
 import { useAuthStore } from "@/store/authStore";
 import axios from "axios";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { LuArrowLeft, LuArrowRight, LuMail } from "react-icons/lu";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { SyncLoader } from "react-spinners";
+
+// Import your user profile hook to check DB status
+import { useUserProfile } from "@/hooks/mutations/useUser";
 
 const VerifyAccount = () => {
   const [otpToken, setOtpToken] = useState<string>("");
@@ -19,6 +22,22 @@ const VerifyAccount = () => {
   const { mutate: verifyAccount, isPending } = useVerify();
 
   const userId = useAuthStore((state) => state.userId);
+
+  // Fetch the user's current status from the database
+  const { data: user, isLoading } = useUserProfile();
+
+  // ─── The Route Guard ───────────────────────────────────────────────────────
+  useEffect(() => {
+    // 1. Wait for the database to respond (!isLoading)
+    // 2. Check if their account is already marked as active
+    if (!isLoading && user?.isActive) {
+      // Adjust 'isActive' to match your exact DB field
+      // If they are active, bounce them out.
+      // Use replace: true so they can't hit the "Back" button and get stuck here.
+      navigate("/dashboard", { replace: true });
+    }
+  }, [isLoading, user?.isActive, navigate]);
+  // ───────────────────────────────────────────────────────────────────────────
 
   const handleResendCode = () => {
     if (!userId) {
@@ -45,20 +64,26 @@ const VerifyAccount = () => {
     });
   };
 
-  const handleVerification = (e: React.SubmitEvent) => {
+  const handleVerification = (e: React.FormEvent) => {
+    // Switched to FormEvent for standard HTML forms
     e.preventDefault();
     console.log("token being submitted", otpToken);
+
     verifyAccount(otpToken, {
       onSuccess: () => {
         toast.success("Account verified.");
-        setOtpToken("");
+
+        // Push them to the next step immediately!
+        // If they need to do the Homeowner setup next, send them to "/onboarding"
+        // If they go straight to the app, send them to "/dashboard"
+        navigate("/onboarding", { replace: true });
       },
       onError(error) {
         if (axios.isAxiosError(error)) {
           const message =
             error.response?.data?.details ??
             error.response?.data?.message ??
-            "something went wrong";
+            "Invalid verification code";
           toast.error(message);
         } else {
           toast.error("Something went wrong");
@@ -70,12 +95,12 @@ const VerifyAccount = () => {
 
   return (
     <SeOnboardingLayout>
-      {/* <div className="flex-1 flex w-full items-center justify-between"> */}
       <SeContainerMD>
         <form
           className="w-full flex flex-col items-center mt-40"
           onSubmit={handleVerification}
         >
+          {/* ... all your existing UI code remains exactly the same ... */}
           <div className="flex flex-col items-center gap-5">
             <div className="w-16 h-16 bg-accent/20 rounded-2xl flex items-center justify-center">
               <LuMail className="stroke-accent h-7 w-7" />
@@ -84,12 +109,15 @@ const VerifyAccount = () => {
             <h3>
               <span className="text-muted">We sent a 6-digit code to </span>
               <span className="font-medium text-text-dark">
-                you@example.com.
+                {user?.email || "your email"}.{" "}
+                {/* Pro-tip: dynamically show their email here! */}
               </span>
             </h3>
           </div>
+
           <div className="w-full grid gap-5 mt-5">
             <SeOTPInput onComplete={(val) => setOtpToken(val)} />
+
             <div className="text-sm flex items-center justify-center gap-2">
               <span className="text-muted">Didn't get it?</span>
               <button
@@ -100,6 +128,7 @@ const VerifyAccount = () => {
                 Resend code
               </button>
             </div>
+
             <div className="flex items-center justify-between mt-20">
               <SeButton
                 type="button"
@@ -110,8 +139,9 @@ const VerifyAccount = () => {
                 clickFunc={() => navigate("/auth/login")}
               />
               <SeButton
+                type="submit" // Changed to type="submit" so hitting Enter on the keyboard works
                 variant="primary"
-                btnText={`${isPending ? "Verifying" : "Verify & continue"}`}
+                btnText={isPending ? "Verifying..." : "Verify & continue"}
                 icon={
                   isPending ? (
                     <SyncLoader size={3} color="#f9fafb" />
@@ -120,12 +150,12 @@ const VerifyAccount = () => {
                   )
                 }
                 iconPosition="right"
+                disabled={isPending || otpToken.length < 6} // Prevent submission if token isn't fully typed
               />
             </div>
           </div>
         </form>
       </SeContainerMD>
-      {/* </div> */}
     </SeOnboardingLayout>
   );
 };

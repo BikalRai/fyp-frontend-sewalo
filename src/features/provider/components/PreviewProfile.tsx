@@ -8,12 +8,17 @@ const PreviewProfile = () => {
   // 2. Read the entire finalized object
   const data = getValues();
 
+  const displayImage =
+    data.imageUrl instanceof File
+      ? URL.createObjectURL(data.imageUrl)
+      : data.imageUrl || "/default-avatar.png";
+
   return (
     <div className="flex flex-col gap-8 bg-slate-50 p-6 rounded-2xl border border-slate-100">
       {/* Header Profile Section */}
       <div className="flex items-center gap-6 border-b border-slate-200 pb-6">
         <img
-          src={data.imageUrl || "/default-avatar.png"}
+          src={displayImage || "/default-avatar.png"}
           alt="Profile"
           className="w-24 h-24 rounded-full object-cover border-4 border-white shadow-sm"
         />
