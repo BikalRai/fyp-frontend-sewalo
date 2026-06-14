@@ -51,3 +51,9 @@ export const resendVerificationCode = async (userId: string) => {
 
   return data;
 };
+
+export const logoutUser = async () => {
+  const { data } = await api.post("/logout");
+
+  return data.data;
+};

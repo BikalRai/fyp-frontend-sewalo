@@ -5,7 +5,7 @@ import SeFooter from "@/components/footer/SeFooter";
 
 const SeAppLayout = ({ children }: IContainerProp) => {
   return (
-    <div className="overflow-hidden bg-bg min-h-dvh ">
+    <div className="bg-bg min-h-dvh ">
       <header className={`min-h-screen bg-primary`}>
         <SeAppNavbar />
         <Hero />

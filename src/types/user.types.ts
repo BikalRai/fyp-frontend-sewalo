@@ -58,6 +58,7 @@ export const UserProfileSchema = z.object({
   id: z.string().uuid(),
   fullName: z.string(),
   email: z.string().email(),
+  phoneNumber: z.string().min(10, "Please enter a valid phone number"),
   role: roleEnumSchema,
   createdAt: z.string().datetime(),
   isActive: z.boolean(),
@@ -95,3 +96,21 @@ export interface UpdateUserAddressParams {
   id: string;
   updateData: UserUpdateAddressPayload;
 }
+
+export const experienceEnum = z.enum(["BEGINNER", "INTERMEDIATE", "EXPERT"]);
+export const pricingBasisEnum = z.enum(["VISIT", "FIXED"]);
+
+export const providerResponseSchema = UserProfileSchema.extend({
+  gender: z.string().nullable().optional(),
+  experience: experienceEnum.nullable().optional(),
+
+  // Java backend expects List<String>, so Zod expects an array of strings
+  services: z.array(z.string()).default([]),
+  workDistrict: z.array(z.string()).default([]),
+
+  bio: z.string().nullable().optional(),
+  pricingBasis: pricingBasisEnum.nullable().optional(),
+  startingRate: z.coerce.string().min(1, "Rate is required"),
+});
+
+export type ProviderResponseType = z.infer<typeof providerResponseSchema>;

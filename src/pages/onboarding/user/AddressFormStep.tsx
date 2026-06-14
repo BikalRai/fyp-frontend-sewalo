@@ -82,6 +82,15 @@ function FlyTo({
   return null;
 }
 
+function MapUpdater({ lat, lng }: { lat: number; lng: number }) {
+  const map = useMap();
+  useEffect(() => {
+    // Gently pans the camera to the new coordinates whenever Zustand updates
+    map.setView([lat, lng], map.getZoom());
+  }, [lat, lng, map]);
+  return null;
+}
+
 // ─── Component ───────────────────────────────────────────────────────────────
 const AddressFormStep = () => {
   const { location, setLocation, setAddress } = useLocationStore();
@@ -197,6 +206,7 @@ const AddressFormStep = () => {
             />
             <MapClickHandler onMapClick={handleMapClick} />
             <FlyTo lat={location.lat} lng={location.lng} trigger={flyTrigger} />
+            <MapUpdater lat={location.lat} lng={location.lng} />
             <Marker
               ref={markerRef}
               position={[location.lat, location.lng]}

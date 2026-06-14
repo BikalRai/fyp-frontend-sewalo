@@ -10,7 +10,9 @@ export interface IButtonProps {
     | "accent"
     | "outlineLight"
     | "tertiary"
-    | "accentLight";
+    | "accentLight"
+    | "tertiaryAccent"
+    | "lightGray";
   size?: "sm" | "md" | "large";
   icon?: React.ReactElement;
   iconPosition?: "left" | "right";
@@ -27,6 +29,9 @@ const variantStlyes = {
   outlineLight: "bg-transparent text-light border-light hover:bg-light/10",
   tertiary:
     "bg-transparent border-transparent text-text-dark hover:underline active:scale-95",
+  tertiaryAccent:
+    "bg-transparent border-transparent text-accent hover:underline active:scale-95",
+  lightGray: "bg-muted/5 border-transparent text-text-dark hover:bg-light-30",
   danger: "bg-danger text-light border-danger hover:bg-soft-danger",
 };
 

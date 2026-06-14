@@ -121,9 +121,7 @@ const ProviderOnboardingFlow = () => {
         onError: (error) => {
           if (axios.isAxiosError(error)) {
             const message =
-              error.response?.data?.details ??
-              error.response?.data?.message ??
-              "Something went wrong.";
+              error.response?.data?.message ?? "Something went wrong.";
             toast.error(message);
           } else {
             toast.error("Something went wrong.");
@@ -149,11 +147,11 @@ const ProviderOnboardingFlow = () => {
     if (user?.onboarded) {
       navigate("/dashboard");
     }
-  }, []);
+  }, [user, navigate]);
 
   return (
     <FormProvider {...methods}>
-      <form onSubmit={methods.handleSubmit(submitHandler)}>
+      <form>
         <SeOnboardingLayout>
           <SeContainerMD className="px-5 lg:px-0">
             <div className="min-h-screen flex flex-col gap-28">
@@ -208,14 +206,21 @@ const ProviderOnboardingFlow = () => {
                   />
                 )}
 
-                {/* Continue / Submit button remains exactly the same element across all steps */}
-                <SeButton
-                  btnText={isLastStep ? "Submit" : "Continue"}
-                  variant="primary"
-                  iconPosition="right"
-                  icon={isPending ? <SeSpinner /> : <LuArrowRight />}
-                  clickFunc={nextStep}
-                />
+                {isLastStep ? (
+                  <SeButton
+                    type="button"
+                    btnText="Submit"
+                    icon={isPending ? <SeSpinner /> : <LuArrowRight />}
+                    clickFunc={methods.handleSubmit(submitHandler)}
+                  />
+                ) : (
+                  <SeButton
+                    type="button"
+                    btnText="Continue"
+                    icon={<LuArrowRight />}
+                    clickFunc={nextStep}
+                  />
+                )}
               </div>
             </div>
           </SeContainerMD>
