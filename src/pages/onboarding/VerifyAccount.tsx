@@ -67,16 +67,10 @@ const VerifyAccount = () => {
   const handleVerification = (e: React.FormEvent) => {
     // Switched to FormEvent for standard HTML forms
     e.preventDefault();
-    console.log("token being submitted", otpToken);
 
     verifyAccount(otpToken, {
       onSuccess: () => {
         toast.success("Account verified.");
-
-        // Push them to the next step immediately!
-        // If they need to do the Homeowner setup next, send them to "/onboarding"
-        // If they go straight to the app, send them to "/dashboard"
-        navigate("/onboarding", { replace: true });
       },
       onError(error) {
         if (axios.isAxiosError(error)) {

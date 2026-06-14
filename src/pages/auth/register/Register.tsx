@@ -77,7 +77,7 @@ const Register = () => {
       <div className="flex gap-3">
         <button
           type="button"
-          onClick={() => setValue("role", "CUSTOMER")}
+          onClick={() => setValue("role", "CUSTOMER", { shouldValidate: true })}
           className={`flex-1 flex flex-col gap-1 border rounded-xl p-4.5 text-left cursor-pointer transition-colors duration-200 ${
             selectedRole === "CUSTOMER"
               ? "border-text-dark"
@@ -99,7 +99,7 @@ const Register = () => {
 
         <button
           type="button"
-          onClick={() => setValue("role", "PROVIDER")}
+          onClick={() => setValue("role", "PROVIDER", { shouldValidate: true })}
           className={`flex-1 flex flex-col gap-1 border rounded-xl p-4.5 text-left cursor-pointer transition-colors duration-200 ${
             selectedRole === "PROVIDER"
               ? "border-text-dark"

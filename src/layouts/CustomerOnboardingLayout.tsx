@@ -84,7 +84,6 @@ const CustomerOnboardingFlow = () => {
 
   const { data: user } = useUserProfile();
   const updateAddressMutation = useUpdateUserAddress();
-  const { location } = useLocationStore();
 
   // ── Navigation ─────────────────────────────────────────────────────────────
 
@@ -178,9 +177,9 @@ const CustomerOnboardingFlow = () => {
       await updateAddressMutation.mutateAsync({
         id: user.id,
         updateData: {
-          lat: location.lat,
-          lng: location.lng,
-          address: location.address,
+          lat: userLocation.lat, // Updated to userLocation
+          lng: userLocation.lng, // Updated to userLocation
+          address: userLocation.address, // Updated to userLocation
         },
       });
 

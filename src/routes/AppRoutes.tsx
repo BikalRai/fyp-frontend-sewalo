@@ -4,8 +4,10 @@ import Auth from "@/pages/auth/Auth";
 import GoogleAuthSetRole from "@/pages/auth/GoogleAuthSetRole";
 import Login from "@/pages/auth/login/Login";
 import Register from "@/pages/auth/register/Register";
-import JobPost from "@/pages/customer/job/JobPost";
 import Dashboard from "@/pages/Dashboard";
+import DashboardHome from "@/pages/dashboard/DashboardHome";
+import DashboardRFQ from "@/pages/dashboard/customer/DashboardRFQ";
+import MyPosts from "@/pages/dashboard/customer/MyPosts";
 import Home from "@/pages/home/Home";
 import VerifyAccount from "@/pages/onboarding/VerifyAccount";
 import { useAuthStore } from "@/store/authStore";
@@ -15,6 +17,9 @@ import {
   Outlet,
   RouterProvider,
 } from "react-router-dom";
+import Profile from "@/pages/dashboard/Profile";
+import JobDetailsPage from "@/pages/dashboard/customer/JobDetailsPage";
+import MessagesPage from "@/pages/dashboard/MessagesPage";
 
 interface RequireAuthProps {
   allowedRoles?: string[];
@@ -96,6 +101,35 @@ const router = createBrowserRouter([
       {
         path: "/dashboard",
         element: <Dashboard />,
+        children: [
+          { index: true, element: <DashboardHome /> },
+          {
+            element: <RequireAuth allowedRoles={["CUSTOMER"]} />,
+            children: [
+              { path: "post-rfq", element: <DashboardRFQ /> },
+              {
+                path: "my-posts",
+                element: <MyPosts />,
+              },
+              {
+                path: "my-posts/:jobid",
+                element: <JobDetailsPage />,
+              },
+            ],
+          },
+          {
+            element: <RequireAuth allowedRoles={["PROVIDER"]} />,
+            children: [],
+          },
+          {
+            element: <Profile />,
+            path: "profile",
+          },
+          {
+            element: <MessagesPage />,
+            path: "messages",
+          },
+        ],
       },
     ],
   },
@@ -103,10 +137,10 @@ const router = createBrowserRouter([
     element: <RequireAuth allowedRoles={["CUSTOMER"]} />,
     children: [
       { path: "/customer-onboarding", element: <CustomerOnboarding /> },
-      {
-        path: "/post-job",
-        element: <JobPost />,
-      },
+      // {
+      //   path: "/post-job",
+      //   element: <JobPost />,
+      // },
     ],
   },
   {

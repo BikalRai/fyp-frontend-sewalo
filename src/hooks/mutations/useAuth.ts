@@ -3,6 +3,7 @@ import {
   googleAuth,
   googleAuthSetRole,
   loginUser,
+  logoutUser,
   registerUser,
   resendVerificationCode,
   verifyAccount,
@@ -171,6 +172,28 @@ export const useResendCode = () => {
     mutationFn: resendVerificationCode,
     onError: (error) => {
       console.error("Failed to resend verification code", error);
+    },
+  });
+};
+
+export const useLogout = () => {
+  const queryClient = useQueryClient();
+  const navigate = useNavigate();
+
+  const clearAuth = useAuthStore((state) => state.clearAuth);
+
+  return useMutation({
+    mutationFn: logoutUser,
+    onSettled: () => {
+      if (clearAuth) {
+        clearAuth();
+      } else {
+        console.warn("Please add a clearAuth method to you useAuthStore!");
+      }
+
+      queryClient.clear();
+
+      navigate("/auth/login");
     },
   });
 };
