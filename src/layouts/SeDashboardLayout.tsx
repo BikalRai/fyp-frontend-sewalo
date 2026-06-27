@@ -8,15 +8,20 @@ import DashboardContentLayoutPadding from "./DashboardContentLayoutPadding";
 const SeDashboardLayout = ({ children }: IContainerProp) => {
   const { data: user, isLoading } = useUserProfile();
 
-  if (isLoading || !user) return <SeSpinner />;
+  if (isLoading || !user)
+    return (
+      <div className="w-full h-screen flex items-center justify-center">
+        <SeSpinner className="h-90 w-90" />
+      </div>
+    );
 
   return (
     <div className="h-dvh w-full flex overflow-hidden">
       <aside className="bg-primary h-full overflow-y-auto w-16 lg:w-60 shrink-0 transition-all duration-300">
         <SeDashboardNavbar role={user.role} />
       </aside>
-      <main className="flex-1 flex flex-col min-w-0 h-full overflow-y-auto relative">
-        <div className="sticky top-0 z-10 p-4 flex items-center justify-between border-b border-b-muted/40 bg-white">
+      <main className="flex-1 flex flex-col min-w-0 h-full overflow-y-auto relative bg-bg">
+        <div className="sticky top-0 z-10 p-4 flex items-center justify-between border-b border-b-muted/40 bg-light">
           <div className="flex items-center">
             <LuPanelLeft className="h-4 w-4 hover:text-accent transition-colors duration-200 cursor-pointer" />
           </div>

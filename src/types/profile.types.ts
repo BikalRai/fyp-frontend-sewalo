@@ -15,7 +15,7 @@ export const providerProfileSchema = z.object({
     .min(10, "Bio must be at least 10 characters to help customers know you"),
   services: z.string().min(3, "Please list at least one service"),
   pricingBasis: z.enum(["VISIT", "FIXED"]).nullish(),
-  startingRate: z.coerce.string().min(1, "Rate is required"),
+  startingRate: z.string().min(1, "Rate is required").nullish(),
 });
 
 export type ProviderProfileFormType = z.infer<typeof providerProfileSchema>;
