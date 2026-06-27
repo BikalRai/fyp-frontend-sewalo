@@ -20,6 +20,9 @@ import {
 import Profile from "@/pages/dashboard/Profile";
 import JobDetailsPage from "@/pages/dashboard/customer/JobDetailsPage";
 import MessagesPage from "@/pages/dashboard/MessagesPage";
+import JobLeadsPage from "@/pages/dashboard/provider/JobLeadsPage";
+import JobLeadDetailsPage from "@/pages/dashboard/provider/JobLeadDetailsPage";
+import MyJobsPage from "@/pages/dashboard/provider/MyJobsPage";
 
 interface RequireAuthProps {
   allowedRoles?: string[];
@@ -119,7 +122,20 @@ const router = createBrowserRouter([
           },
           {
             element: <RequireAuth allowedRoles={["PROVIDER"]} />,
-            children: [],
+            children: [
+              {
+                element: <JobLeadsPage />,
+                path: "leads",
+              },
+              {
+                element: <JobLeadDetailsPage />,
+                path: "leads/:id",
+              },
+              {
+                element: <MyJobsPage />,
+                path: "my-jobs",
+              },
+            ],
           },
           {
             element: <Profile />,

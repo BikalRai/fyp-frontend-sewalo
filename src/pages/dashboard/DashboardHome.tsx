@@ -1,6 +1,7 @@
 import SeButton from "@/components/button/SeButton";
 import SeDashboardHeader from "@/components/heading/SeDashboardHeader";
 import SeSpinner from "@/components/spinner/SeSpinner";
+import ProviderDashboard from "@/features/dashboard/components/ProviderDashboard";
 import CustomerDashboardHome from "@/features/dashboard/CustomerDashboardHome";
 import { useUserProfile } from "@/hooks/mutations/useUser";
 import { LuPlus } from "react-icons/lu";
@@ -9,7 +10,11 @@ const DashboardHome = () => {
   const { data: user, isLoading } = useUserProfile();
 
   if (isLoading || !user) {
-    return <SeSpinner />;
+    return (
+      <div className="h-full">
+        <SeSpinner className="w-90 h-90" />
+      </div>
+    );
   }
 
   const username = user.fullName.split(" ")[0];
@@ -32,11 +37,12 @@ const DashboardHome = () => {
           </div>
           <p className="leading-6 text-muted">
             {user.role === "CUSTOMER"
-              ? `Here's what's happening with your jobs`
-              : `You have 8 new leads near you today`}
+              ? `Here's what's happening with your jobs.`
+              : `Here's your lead activity and earnings overview.`}
           </p>
         </div>
         {user.role === "CUSTOMER" && <CustomerDashboardHome />}
+        {user.role === "PROVIDER" && <ProviderDashboard />}
       </div>
     </div>
   );
