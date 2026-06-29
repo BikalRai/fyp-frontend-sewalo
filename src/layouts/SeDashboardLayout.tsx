@@ -4,9 +4,30 @@ import SeSpinner from "@/components/spinner/SeSpinner";
 import { useUserProfile } from "@/hooks/mutations/useUser";
 import { LuBell, LuPanelLeft } from "react-icons/lu";
 import DashboardContentLayoutPadding from "./DashboardContentLayoutPadding";
+import { useAuthStore } from "@/store/authStore";
+import { useWebSocketStore } from "@/store/useWebSocketStore";
+import { useEffect } from "react";
 
 const SeDashboardLayout = ({ children }: IContainerProp) => {
   const { data: user, isLoading } = useUserProfile();
+
+  //Pull the token and connection actions from Zustand
+  const accessToken = useAuthStore((state) => state.accessToken);
+  const connect = useWebSocketStore((state) => state.connect);
+  const disconnect = useWebSocketStore((state) => state.disconnect);
+
+  // Manage the WebSocket lifecycle
+  useEffect(() => {
+    // Only connect if we have a token and the user profile has finished loading
+    if (accessToken && user) {
+      connect(accessToken);
+    }
+
+    // Cleanup: disconnect if the layout unmounts (e.g., user logs out)
+    return () => {
+      disconnect();
+    };
+  }, [accessToken, user, connect, disconnect]);
 
   if (isLoading || !user)
     return (
