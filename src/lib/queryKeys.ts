@@ -19,3 +19,26 @@ export const customerKeys = {
   me: () => ["customer", "me"] as const,
   history: (id: string) => ["customer", id, "history"] as const,
 };
+
+export const categorykeys = {
+  all: ["categories"] as const,
+};
+
+export const jobKeys = {
+  // the base key (invalidating this nukes everything related to jobs)
+  all: ["jobs"] as const,
+
+  // lists
+  lists: () => [...jobKeys.all, "list"] as const,
+
+  // specific list
+  customerHistory: () => [...jobKeys.lists(), "customer"] as const,
+
+  // provider feed
+  providerFeed: () => [...jobKeys.lists(), "open"] as const,
+
+  // details
+  details: () => [...jobKeys.all, "detail"] as const,
+
+  detail: (jobId: string) => [...jobKeys.details(), jobId] as const,
+};

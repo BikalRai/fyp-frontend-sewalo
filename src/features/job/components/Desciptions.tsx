@@ -1,36 +1,37 @@
-import SeInput from "@/components/input/SeInput";
-import { useImageStore, useUrgencyStore } from "@/store/jobStore";
+import {
+  useImageStore,
+  useUrgencyStore,
+  useDescriptionStore, // 1. Import the new store
+} from "@/store/jobStore";
 import { IoCloseSharp } from "react-icons/io5";
 import { LuCamera } from "react-icons/lu";
 
 type urgency = {
   name: string;
+  value: "EMERGENCY" | "STANDARD" | "PLANNING";
 };
 
 const urgencies: urgency[] = [
-  { name: "Emergency" },
-  { name: "Standard" },
-  { name: "Planning Ahead" },
+  { name: "Emergency", value: "EMERGENCY" },
+  { name: "Standard", value: "STANDARD" },
+  { name: "Planning Ahead", value: "PLANNING" },
 ];
 
 const Desciptions = () => {
   const { urgency: selectedUrgency, setUrgency } = useUrgencyStore();
   const { addImages, selectedImages, removeImage } = useImageStore();
 
+  // 2. Initialize the hook
+  const { description, setDescription } = useDescriptionStore();
+
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
-
     addImages(files);
   };
 
   return (
-    <div className="bg-light/20 rounded-2xl shadow-sm border border-muted/5 py-8 px-6">
-      {/* job title */}
-      <SeInput
-        label="JOB TITLE"
-        name="jobTitle"
-        placeholderText="e.g. Kitchen pipe leak repair"
-      />
+    <div className="bg-light rounded-2xl shadow-sm border border-muted/5 py-8 px-6">
+      {/* WHY: The JOB TITLE input was deleted here because we removed it from the database schema */}
 
       <div className="grid gap-3 mt-5">
         <h4 className="text-sm text-text-dark font-medium uppercase">
@@ -38,12 +39,17 @@ const Desciptions = () => {
         </h4>
 
         {/* urgency */}
-        <div className="flex items-center gap-2  flex-wrap">
+        <div className="flex items-center gap-2 flex-wrap">
           {urgencies.map((urgency, i) => (
             <div
               key={i + 1}
-              className={`rounded-full flex items-center justify-center py-3 px-4 border hover:bg-accent/20 ${selectedUrgency === urgency.name ? "bg-accent/20 border-accent" : "bg-light border-muted/5"} transition-colors duration-150 cursor-pointer`}
-              onClick={() => setUrgency(urgency.name)}
+              className={`rounded-full flex items-center justify-center py-3 px-4 border hover:bg-accent/20 ${
+                // FIX: Check against urgency.value, not urgency.name
+                selectedUrgency === urgency.value
+                  ? "bg-accent/20 border-accent"
+                  : "bg-light/30 border-muted/30"
+              } transition-colors duration-150 cursor-pointer`}
+              onClick={() => setUrgency(urgency.value)}
             >
               {urgency.name}
             </div>
@@ -57,10 +63,13 @@ const Desciptions = () => {
           </h4>
           <div className="border-2 border-muted/20 rounded-xl h-26.5 focus-within:border-accent">
             <textarea
-              name=""
-              id=""
+              name="description"
+              id="description"
               placeholder="Describe the problem in detail..."
-              className="w-full h-full resize-none py-3 px-4 rounded-xl border-0 outline-0"
+              className="w-full h-full resize-none py-3 px-4 rounded-xl border-0 outline-0 bg-transparent"
+              // 3. Bind the state to the textarea here
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
             ></textarea>
           </div>
         </div>

@@ -1,6 +1,7 @@
 import type { ComponentType } from "react";
 
 export interface IJobCategoryCard {
+  id: string;
   Icon: React.ElementType;
   title: string;
   selected: string | null;
@@ -19,37 +20,59 @@ export interface JobStep {
 }
 
 export interface IJobCardProps {
-  title: string;
   description: string;
   jobType: string;
   bids: number;
   jobPosted: Date;
 }
 
-export interface IJobCategoryCard {
-  Icon: React.ElementType;
-  title: string;
-  selected: string | null;
-  setSelected: (name: string) => void;
-}
-
-export interface IJobCategoryProps {
-  Icon: React.ElementType;
-  title: string;
-}
-
-export interface JobStep {
-  title: string;
+export interface CreateJobFormValues {
+  category: string;
+  urgency: string;
   description: string;
-  component: React.ComponentType;
+  address: string;
+  latitude: number;
+  longitude: number;
+  phoneNumber: string;
+  images: File[];
 }
 
-export interface IJobCardProps {
-  title: string;
+export interface CreateJobPayload {
+  category: string;
+  urgency: string;
+  description: string; // WHY: This must be here to satisfy the backend DTO
+  address: string;
+  latitude: number;
+  longitude: number;
+  phoneNumber: string;
+  images: string[];
+}
+
+export type Urgency = "EMERGENCY" | "STANDARD" | "PLANNING_AHEAD";
+export type JobStatus =
+  | "ANALYZING"
+  | "OPEN"
+  | "IN_PROGRESS"
+  | "COMPLETED"
+  | "CANCELLED";
+
+export interface JobResponse {
+  id: string;
+  // title: string; -> Removed as per our database changes
   description: string;
-  jobType: string;
-  bids: number;
-  jobPosted: Date;
+  categoryName: string;
+  categoryIcon: string;
+  urgency: Urgency;
+  status: JobStatus;
+  images: string[];
+  createdAt: string;
+  expiresAt: string;
+  latitude: number;
+  longitude: number;
+  address: string;
+  customerName: string;
+  customerImageUrl: string | null;
+  bidCount: number;
 }
 
 // types/job.types.ts (or just at the top of the file)
