@@ -1,8 +1,13 @@
 import { create } from "zustand";
 
+export interface SelectedCategory {
+  id: string;
+  name: string;
+}
+
 export interface JobPostState {
-  selectedCategory: string | null;
-  setSelectedCategory: (val: string | null) => void;
+  selectedCategory: SelectedCategory | null;
+  setSelectedCategory: (val: SelectedCategory | null) => void;
   reset: () => void;
 }
 
@@ -25,6 +30,18 @@ export const useUrgencyStore = create<UrgencyState>((set) => ({
       urgency: val,
     }),
   reset: () => set({ urgency: null }),
+}));
+
+export interface DescriptionState {
+  description: string;
+  setDescription: (val: string) => void;
+  reset: () => void;
+}
+
+export const useDescriptionStore = create<DescriptionState>((set) => ({
+  description: "",
+  setDescription: (val) => set({ description: val }),
+  reset: () => set({ description: "" }),
 }));
 
 export interface ImageState {

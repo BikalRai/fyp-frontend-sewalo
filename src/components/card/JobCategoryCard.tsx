@@ -1,12 +1,13 @@
 import type { IJobCategoryCard } from "@/types/job.types";
 
 const JobCategoryCard = ({
+  id,
   Icon,
   title,
   selected,
   setSelected,
 }: IJobCategoryCard) => {
-  const isSelected = selected?.toLowerCase() === title?.toLowerCase();
+  const isSelected = selected === id;
   return (
     <div
       className={`w-full max-w-56 rounded-2xl flex flex-col justify-center items-center gap-3 py-6 border-2 shadow-2xs cursor-pointer
@@ -16,7 +17,7 @@ const JobCategoryCard = ({
             ? "bg-accent border-accent scale-[1.03] shadow-md"
             : "bg-light border-muted/20 hover:bg-accent/10 hover:border-accent/50 hover:scale-[1.01] hover:shadow-sm"
         }`}
-      onClick={() => setSelected(title)}
+      onClick={() => setSelected(id)}
     >
       <div
         className={`transition-transform duration-150 ${isSelected ? "scale-110" : ""}`}
