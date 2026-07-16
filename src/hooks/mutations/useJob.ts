@@ -1,13 +1,17 @@
 import { jobKeys } from "@/lib/queryKeys";
 import {
+  cancelJobPost,
   getCustomerJobById,
   getCustomerJobs,
+  getJobLead,
+  getProviderJobLeads,
   postJob,
 } from "@/services/job.service";
 import { uploadImagesToCloudinary } from "@/services/upload.service";
 import type { CreateJobFormValues, CreateJobPayload } from "@/types/job.types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
+// Home owner actions
 export const useCreateJob = () => {
   const queryClient = useQueryClient();
 
@@ -56,5 +60,32 @@ export const useCustomerJobDetail = (id: string) => {
   return useQuery({
     queryKey: jobKeys.detail(id),
     queryFn: () => getCustomerJobById(id),
+  });
+};
+
+export const useCancelJobPost = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => {
+      return cancelJobPost(id);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: jobKeys.details() });
+      queryClient.invalidateQueries({ queryKey: jobKeys.lists() });
+    },
+  });
+};
+
+export const useJobLeads = () => {
+  return useQuery({
+    queryKey: jobKeys.providerFeed(),
+    queryFn: getProviderJobLeads,
+  });
+};
+
+export const useJobLead = (id: string) => {
+  return useQuery({
+    queryKey: jobKeys.detail(id),
+    queryFn: () => getJobLead(id),
   });
 };

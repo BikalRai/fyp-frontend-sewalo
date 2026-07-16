@@ -175,6 +175,7 @@ const AddressFormStep = () => {
             />
           </div>
           <button
+            type="button"
             onClick={handleSearch}
             disabled={isSearching}
             className="flex items-center gap-1.5 px-4 rounded-xl bg-accent text-white text-sm font-semibold disabled:opacity-60 disabled:cursor-not-allowed hover:opacity-90 transition-opacity whitespace-nowrap"
@@ -220,6 +221,7 @@ const AddressFormStep = () => {
 
           {/* My location button */}
           <button
+            type="button"
             onClick={handleMyLocation}
             title="Use my current location"
             className="absolute top-2.5 right-2.5 z-1000 w-9 h-9 rounded-lg bg-white border border-muted/20 shadow-sm flex items-center justify-center hover:bg-gray-50 transition-colors"

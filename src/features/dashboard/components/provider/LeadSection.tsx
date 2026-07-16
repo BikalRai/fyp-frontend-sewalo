@@ -12,7 +12,9 @@ const LeadSection = () => {
       <div className="h-16 w-16 rounded-full flex items-center justify-center bg-primary/10">
         <LuBriefcase className="h-8 w-8 stroke-2" />
       </div>
-      <h3 className="text-xl font-bold leading-7">Readyto find new Clients?</h3>
+      <h3 className="text-xl font-bold leading-7">
+        Ready to find new Clients?
+      </h3>
       <p className="text-muted leading-6 max-w-md text-center">
         Browse fresh leads in your area and start growing your business today.
       </p>

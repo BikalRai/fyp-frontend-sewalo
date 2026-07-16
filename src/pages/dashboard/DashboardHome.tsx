@@ -5,9 +5,11 @@ import ProviderDashboard from "@/features/dashboard/components/ProviderDashboard
 import CustomerDashboardHome from "@/features/dashboard/CustomerDashboardHome";
 import { useUserProfile } from "@/hooks/mutations/useUser";
 import { LuPlus } from "react-icons/lu";
+import { useNavigate } from "react-router-dom";
 
 const DashboardHome = () => {
   const { data: user, isLoading } = useUserProfile();
+  const navigate = useNavigate();
 
   if (isLoading || !user) {
     return (
@@ -32,6 +34,7 @@ const DashboardHome = () => {
                 variant="accentLight"
                 icon={<LuPlus />}
                 iconPosition="left"
+                clickFunc={() => navigate("/dashboard/post-rfq")}
               />
             )}
           </div>

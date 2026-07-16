@@ -16,6 +16,9 @@ export interface IProvider {
   bio: string;
   pricingBasis: string;
   startingRate: string;
+  latitude: number;
+  longitude: number;
+  address: string;
   user: UserProfileType;
 }
 
@@ -54,9 +57,18 @@ export const providerAboutSchema = z.object({
   startingRate: z.string(),
 });
 
+export const providerLocationSchema = z.object({
+  latitude: z.number().min(-90).max(90, "Invalid latitude"),
+  longitude: z.number().min(-180).max(180, "Invalid longitude"),
+  address: z.string().min(2, "Please pin a valid location on the map"),
+});
+
+export type ProviderLocationType = z.infer<typeof providerLocationSchema>;
+
 export const masterProviderSchema = providerPersonalDetails
+  .merge(providerAboutSchema)
+  .merge(providerLocationSchema)
   .merge(providerServicesSchema)
-  .merge(providerWorkAreaSchema)
-  .merge(providerAboutSchema);
+  .merge(providerWorkAreaSchema);
 
 export type MasterProviderType = z.infer<typeof masterProviderSchema>;

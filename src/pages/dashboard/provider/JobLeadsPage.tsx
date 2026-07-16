@@ -1,4 +1,6 @@
 import SeButton from "@/components/button/SeButton";
+import { useJobLeads } from "@/hooks/mutations/useJob";
+import { formatTimeAgo } from "@/uitls/job.utils";
 import { Group, Paper, Select, SimpleGrid, Text } from "@mantine/core";
 import {
   IoLocationOutline,
@@ -12,6 +14,7 @@ import {
   IoFlashOutline,
   IoPersonOutline,
 } from "react-icons/io5";
+import { useNavigate } from "react-router-dom";
 
 const stats = [
   {
@@ -70,6 +73,20 @@ const mockLeads = [
 ];
 
 const JobLeadsPage = () => {
+  const { data: leads, isLoading, isError } = useJobLeads();
+  const navigate = useNavigate();
+
+  // 1. Handle the loading state FIRST
+  if (isLoading) {
+    return <div>Loading your leads...</div>;
+  }
+
+  // 2. Handle potential API/Auth errors
+  if (isError) {
+    return <div>Error loading leads.</div>;
+  }
+  console.log(leads, "LEADS");
+
   const hour = new Date().getHours();
   const greeting =
     hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
@@ -187,13 +204,18 @@ const JobLeadsPage = () => {
 
       {/* cards */}
       <div className="grid gap-4">
-        {mockLeads.map((lead) => {
-          const isHighDemand = lead.currentBids === lead.maxBids - 1;
-          const badgeStyles = {
-            high: "bg-soft-danger/10 text-soft-danger",
-            medium: "bg-yellow-100 text-yellow-700",
-            low: "bg-light-gray text-muted",
-          }[lead.urgencyLevel];
+        {leads?.map((lead) => {
+          // Map to actual backend enums
+          const badgeStyles =
+            {
+              HIGH: "bg-soft-danger/10 text-soft-danger",
+              STANDARD: "bg-yellow-100 text-yellow-700",
+              LOW: "bg-light-gray text-muted",
+            }[lead.urgency] || "bg-light-gray text-muted";
+
+          // Determine text styling based on whether there is active competition
+          const hasBids = lead.bidCount > 0;
+          const bidText = lead.bidCount === 1 ? "Bid" : "Bids";
 
           return (
             <div
@@ -203,22 +225,28 @@ const JobLeadsPage = () => {
               <div className="flex justify-between items-start">
                 <div className="flex items-center gap-2 text-xs font-medium text-muted">
                   <span
-                    className={`px-2.5 py-0.5 rounded-full font-bold ${badgeStyles}`}
+                    className={`px-2.5 py-0.5 rounded-full font-bold uppercase tracking-wider ${badgeStyles}`}
                   >
-                    {lead.urgencyText}
+                    {lead.urgency}
                   </span>
-                  <span>{lead.category}</span>
                   <span className="w-1 h-1 rounded-full bg-light-gray"></span>
-                  <span>{lead.distance}</span>
+                  <span className="bg-primary/5 px-2 py-1 rounded-2xl text-primary font-medium">
+                    {lead.distance} KM
+                  </span>
                 </div>
+
+                {/* Refactored Bid Count UI */}
                 <div className="flex items-center gap-1.5 text-xs font-medium">
-                  <IoPeopleOutline className="text-muted" size={14} />
+                  <IoPeopleOutline
+                    className={hasBids ? "text-primary" : "text-muted"}
+                    size={14}
+                  />
                   <span
                     className={
-                      isHighDemand ? "text-soft-danger font-bold" : "text-muted"
+                      hasBids ? "text-primary font-bold" : "text-muted"
                     }
                   >
-                    {lead.currentBids} / {lead.maxBids} Bids
+                    {lead.bidCount} {bidText}
                   </span>
                 </div>
               </div>
@@ -226,16 +254,15 @@ const JobLeadsPage = () => {
               <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
                 <div className="flex-1 pr-0 sm:pr-4">
                   <h3 className="text-lg font-bold text-primary mb-1.5">
-                    {lead.title}
+                    {lead.categoryName} Request
                   </h3>
-                  {/* Description is always visible — no lock logic here */}
-                  <p className="text-sm text-text-dark line-clamp-2">
+                  <p className="text-sm text-text-dark line-clamp-2 leading-relaxed">
                     {lead.description}
                   </p>
                 </div>
                 <div className="shrink-0 w-full sm:w-auto mt-2 sm:mt-0">
-                  {/* Single CTA — always "View Details" */}
                   <SeButton
+                    clickFunc={() => navigate(`/dashboard/leads/${lead.id}`)}
                     btnText="View Details"
                     variant="accentLight"
                     icon={<IoArrowForward className="text-lg" />}
@@ -247,13 +274,16 @@ const JobLeadsPage = () => {
               <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm font-medium text-text-dark mt-1">
                 <div className="flex items-center gap-1.5">
                   <IoLocationOutline className="text-muted text-lg shrink-0" />
-                  <span className="truncate">{lead.location}</span>
+                  <span className="truncate">
+                    {lead.address || "Address not provided"}
+                  </span>
                 </div>
                 <div className="flex items-center gap-1.5">
                   <IoTimeOutline className="text-muted text-lg shrink-0" />
-                  <span>{lead.postedAt}</span>
+                  <span>{formatTimeAgo(lead.createdAt)}</span>
                 </div>
-                <div className="font-bold text-primary">{lead.budget}</div>
+
+                <div className="font-bold text-primary">Budget TBD</div>
               </div>
             </div>
           );

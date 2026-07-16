@@ -26,6 +26,8 @@ const VerifyAccount = () => {
   // Fetch the user's current status from the database
   const { data: user, isLoading } = useUserProfile();
 
+  console.log(user, "USER ID");
+
   // ─── The Route Guard ───────────────────────────────────────────────────────
   useEffect(() => {
     // 1. Wait for the database to respond (!isLoading)

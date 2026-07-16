@@ -42,3 +42,9 @@ export const jobKeys = {
 
   detail: (jobId: string) => [...jobKeys.details(), jobId] as const,
 };
+
+export const bidKeys = {
+  all: ["bids"] as const,
+
+  jobBids: (jobId: string) => ["bids", "job", jobId] as const,
+};

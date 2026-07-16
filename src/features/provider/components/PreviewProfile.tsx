@@ -75,14 +75,26 @@ const PreviewProfile = () => {
         </p>
       </div>
 
-      {/* Work Area */}
-      <div>
-        <h4 className="text-sm font-semibold text-slate-400 uppercase tracking-wider mb-3">
-          Service Areas
-        </h4>
-        <p className="text-slate-700 font-medium">
-          {data.workArea?.join(", ")}
-        </p>
+      {/* Location Details (Work Area & Address) */}
+      <div className="grid grid-cols-2 gap-6">
+        <div>
+          <h4 className="text-sm font-semibold text-slate-400 uppercase tracking-wider mb-3">
+            Service Areas
+          </h4>
+          <p className="text-slate-700 font-medium">
+            {data.workArea?.join(", ")}
+          </p>
+        </div>
+
+        {/* NEW: Address Section */}
+        <div>
+          <h4 className="text-sm font-semibold text-slate-400 uppercase tracking-wider mb-3">
+            Primary Base
+          </h4>
+          <p className="text-slate-700 font-medium">
+            {data.address || "No address provided"}
+          </p>
+        </div>
       </div>
     </div>
   );
