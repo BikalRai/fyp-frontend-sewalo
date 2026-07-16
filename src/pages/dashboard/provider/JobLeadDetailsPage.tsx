@@ -1,4 +1,5 @@
 import SeButton from "@/components/button/SeButton";
+import { useJobLead } from "@/hooks/mutations/useJob";
 import { useState } from "react";
 import {
   IoLocationOutline,
@@ -10,7 +11,7 @@ import {
   IoCallOutline,
   IoCheckmarkCircleOutline,
 } from "react-icons/io5";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
 type BidState = "locked" | "unlocked" | "bidding" | "submitted";
 
@@ -33,6 +34,12 @@ const lead = {
 };
 
 const JobLeadDetailsPage = () => {
+  const { id } = useParams();
+
+  const { data: job } = useJobLead(String(id));
+
+  console.log(job);
+
   const navigate = useNavigate();
   const [bidState, setBidState] = useState<BidState>("locked");
   const [quote, setQuote] = useState("");

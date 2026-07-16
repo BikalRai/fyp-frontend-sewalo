@@ -26,6 +26,8 @@ import SeSpinner from "@/components/spinner/SeSpinner";
 import { useNavigate } from "react-router-dom";
 import { RingLoader } from "react-spinners";
 import { useUserProfile } from "@/hooks/mutations/useUser";
+import AddressFormStep from "@/pages/onboarding/user/AddressFormStep";
+import { useLocationStore } from "@/store/jobStore";
 
 const steps: IProviderStep[] = [
   {
@@ -45,6 +47,12 @@ const steps: IProviderStep[] = [
     description: "Choose the districts where you can work.",
     component: WorkArea,
     fields: ["workArea"],
+  },
+  {
+    title: "Your Location",
+    description: "Pin your primary base of operations.",
+    component: AddressFormStep,
+    fields: ["latitude", "longitude", "address"],
   },
   {
     title: "About you",
@@ -67,11 +75,27 @@ const ProviderOnboardingFlow = () => {
   const [active, setActive] = useState<number>(0);
 
   const { data: user } = useUserProfile();
+  const { location } = useLocationStore();
 
   const methods = useForm({
     resolver: zodResolver(masterProviderSchema),
     mode: "onTouched",
   });
+
+  useEffect(() => {
+    // Whenever the map pin moves, update the hidden form fields
+    if (location.lat && location.lng) {
+      methods.setValue("latitude", location.lat, {
+        shouldValidate: active > 0,
+      });
+      methods.setValue("longitude", location.lng, {
+        shouldValidate: active > 0,
+      });
+      methods.setValue("address", location.address || "", {
+        shouldValidate: active > 0,
+      });
+    }
+  }, [location, methods, active]);
 
   const { mutate: updateProviderProfile, isPending } =
     useUpdateProviderPersonal();
@@ -209,8 +233,9 @@ const ProviderOnboardingFlow = () => {
                 {isLastStep ? (
                   <SeButton
                     type="button"
-                    btnText="Submit"
+                    btnText={isPending ? "Submitting..." : "Submit"}
                     icon={isPending ? <SeSpinner /> : <LuArrowRight />}
+                    disabled={isPending}
                     clickFunc={methods.handleSubmit(submitHandler)}
                   />
                 ) : (

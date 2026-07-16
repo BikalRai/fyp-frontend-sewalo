@@ -1,6 +1,8 @@
 import SeButton from "@/components/button/SeButton";
 import { IoAddCircleOutline } from "react-icons/io5";
+import { useNavigate } from "react-router-dom";
 const DashboardNoJobPost = () => {
+  const navigate = useNavigate();
   return (
     <div
       className="w-full bg-primary/5 flex flex-col items-center justify-center gap-5 py-12 rounded-xl text-center"
@@ -22,6 +24,7 @@ const DashboardNoJobPost = () => {
         variant="accentLight"
         iconPosition="left"
         size="sm"
+        clickFunc={() => navigate("/dashboard/post-rfq")}
       />
     </div>
   );
