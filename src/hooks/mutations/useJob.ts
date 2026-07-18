@@ -5,9 +5,13 @@ import {
   getCustomerJobs,
   getJobLead,
   getProviderJobLeads,
+  getProviderJobsList,
+  placeBid,
   postJob,
+  unlockJob,
 } from "@/services/job.service";
 import { uploadImagesToCloudinary } from "@/services/upload.service";
+import type { PlaceBidRequestDto } from "@/types/bid.types";
 import type { CreateJobFormValues, CreateJobPayload } from "@/types/job.types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
@@ -76,6 +80,7 @@ export const useCancelJobPost = () => {
   });
 };
 
+// provider
 export const useJobLeads = () => {
   return useQuery({
     queryKey: jobKeys.providerFeed(),
@@ -87,5 +92,48 @@ export const useJobLead = (id: string) => {
   return useQuery({
     queryKey: jobKeys.detail(id),
     queryFn: () => getJobLead(id),
+  });
+};
+
+export const useUnlockJob = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (id: string) => unlockJob(id),
+    onSuccess: (_, id) => {
+      queryClient.invalidateQueries({ queryKey: jobKeys.detail(id) });
+      queryClient.invalidateQueries({ queryKey: jobKeys.lists() });
+    },
+  });
+};
+
+export const usePlaceBid = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    // 1. Accept a SINGLE object containing all your arguments
+    mutationFn: ({
+      jobId,
+      payload,
+    }: {
+      jobId: string;
+      payload: PlaceBidRequestDto;
+    }) => placeBid(jobId, payload),
+
+    // 2. The second parameter is the exact variables object you passed in
+    onSuccess: (_, variables) => {
+      // 3. Access the jobId from that object
+      queryClient.invalidateQueries({
+        queryKey: jobKeys.detail(variables.jobId),
+      });
+      queryClient.invalidateQueries({ queryKey: jobKeys.lists() });
+    },
+  });
+};
+
+export const useProviderJobs = () => {
+  return useQuery({
+    queryKey: jobKeys.providerFeed(),
+    queryFn: getProviderJobsList,
   });
 };

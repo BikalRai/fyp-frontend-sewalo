@@ -10,202 +10,103 @@ import {
   IoStarOutline,
 } from "react-icons/io5";
 import SeButton from "@/components/button/SeButton";
-
-type JobStatus = "pending" | "active" | "completed" | "rejected";
-
-interface IJob {
-  id: string;
-  title: string;
-  category: string;
-  location: string;
-  customerName: string;
-  customerPhone?: string;
-  yourQuote: number;
-  status: JobStatus;
-  postedAt: string;
-  timeline: string;
-  completedAt?: string;
-  isReviewed?: boolean;
-  customerRating?: number;
-}
-
-const mockJobs: IJob[] = [
-  {
-    id: "job-1",
-    title: "Leaking kitchen sink — needs urgent fix",
-    category: "Plumbing",
-    location: "Lalitpur, Kupondole",
-    customerName: "Sanjay Thapa",
-    customerPhone: "+977 9841234567",
-    yourQuote: 2000,
-    status: "active",
-    postedAt: "2 days ago",
-    timeline: "Today",
-  },
-  {
-    id: "job-2",
-    title: "Bathroom tile repair — 2 broken tiles",
-    category: "Masonry",
-    location: "Kathmandu, Baneshwor",
-    customerName: "Priya Shrestha",
-    customerPhone: "+977 9812345678",
-    yourQuote: 3500,
-    status: "active",
-    postedAt: "1 day ago",
-    timeline: "Tomorrow",
-  },
-  {
-    id: "job-3",
-    title: "Complete home rewiring and main panel upgrade",
-    category: "Electrical",
-    location: "Kathmandu, Sanepa",
-    customerName: "Ramesh Karki",
-    yourQuote: 4500,
-    status: "pending",
-    postedAt: "3 hrs ago",
-    timeline: "This week",
-  },
-  {
-    id: "job-4",
-    title: "Install 3 ceiling fans",
-    category: "Electrical",
-    location: "Lalitpur, Jhamsikhel",
-    customerName: "Deepa Adhikari",
-    yourQuote: 1800,
-    status: "pending",
-    postedAt: "5 hrs ago",
-    timeline: "This weekend",
-  },
-  {
-    id: "job-5",
-    title: "Full house plumbing inspection",
-    category: "Plumbing",
-    location: "Kathmandu, New Baneshwor",
-    customerName: "Bikash Rai",
-    yourQuote: 3000,
-    status: "completed",
-    postedAt: "1 week ago",
-    timeline: "Completed",
-    completedAt: "Jun 22",
-    isReviewed: true,
-    customerRating: 5,
-  },
-  {
-    id: "job-6",
-    title: "Water tank installation",
-    category: "Plumbing",
-    location: "Bhaktapur, Suryabinayak",
-    customerName: "Sunita Tamang",
-    yourQuote: 5500,
-    status: "completed",
-    postedAt: "2 weeks ago",
-    timeline: "Completed",
-    completedAt: "Jun 18",
-    isReviewed: false,
-  },
-];
-
-// Earnings summary derived from completed jobs
-const totalEarned = mockJobs
-  .filter((j) => j.status === "completed")
-  .reduce((sum, j) => sum + j.yourQuote, 0);
-
-const earningsStats = [
-  {
-    label: "Total earned",
-    value: `Rs. ${totalEarned.toLocaleString()}`,
-    icon: <IoWalletOutline className="text-accent text-lg" />,
-  },
-  {
-    label: "This month",
-    value: "Rs. 8,500",
-    icon: <IoTrendingUpOutline className="text-accent text-lg" />,
-  },
-  {
-    label: "Active jobs",
-    value: mockJobs.filter((j) => j.status === "active").length.toString(),
-    icon: <IoHourglassOutline className="text-accent text-lg" />,
-  },
-  {
-    label: "Avg. rating",
-    value: "4.8",
-    icon: <IoStarOutline className="text-yellow-400 text-lg" />,
-  },
-];
+import { formatTimeAgo } from "@/uitls/job.utils";
+import type { JobResponse } from "@/types/job.types";
+import { useProviderJobs } from "@/hooks/mutations/useJob";
 
 // --- Sub-components per tab ---
 
-const PendingCard = ({ job }: { job: IJob }) => (
-  <div className="bg-card-bg border border-light-gray rounded-2xl p-5 flex flex-col sm:flex-row justify-between gap-4">
+const PendingCard = ({ job }: { job: JobResponse }) => (
+  <div className="bg-card-bg border border-light-gray rounded-2xl p-5 flex flex-col sm:flex-row justify-between gap-4 hover:border-accent transition-colors">
     <div className="flex-1">
       <div className="flex items-center gap-2 text-xs text-muted font-medium mb-2">
-        <span>{job.category}</span>
+        <span className="font-bold uppercase tracking-wider text-primary bg-card-label px-2 py-0.5 rounded-full">
+          {job.categoryName}
+        </span>
         <span className="w-1 h-1 rounded-full bg-light-gray" />
-        <span>{job.postedAt}</span>
+        <span>{formatTimeAgo(job.createdAt)}</span>
       </div>
-      <h3 className="text-base font-bold text-primary mb-1">{job.title}</h3>
+      <h3 className="text-base font-bold text-primary mb-1">
+        {job.categoryName} Request
+      </h3>
+      <p className="text-sm text-text-dark line-clamp-1 mb-2">
+        {job.description}
+      </p>
+
       <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-text-dark mt-2">
         <span className="flex items-center gap-1.5">
           <IoLocationOutline className="text-muted" />
-          {job.location}
+          <span className="truncate max-w-50">{job.address}</span>
         </span>
         <span className="flex items-center gap-1.5">
           <IoTimeOutline className="text-muted" />
-          {job.timeline}
+          {job.urgency.replace("_", " ")}
         </span>
       </div>
     </div>
+
     <div className="flex flex-col items-end justify-between gap-3 shrink-0">
       <div className="text-right">
-        <p className="text-xs text-muted font-medium">Your quote</p>
+        <p className="text-xs text-muted font-medium uppercase tracking-wider">
+          Your quote
+        </p>
         <p className="text-lg font-bold text-primary">
-          Rs. {job.yourQuote.toLocaleString()}
+          Rs. {job.myBid?.quotedPrice?.toLocaleString() || 0}
         </p>
       </div>
       <div className="flex items-center gap-2">
         <span className="text-xs text-muted font-medium">
-          Awaiting response from {job.customerName}
+          Awaiting response from {job.customerName.split(" ")[0]}
         </span>
       </div>
     </div>
   </div>
 );
 
-const ActiveCard = ({ job }: { job: IJob }) => (
-  <div className="bg-card-bg border border-accent/30 rounded-2xl p-5 flex flex-col sm:flex-row justify-between gap-4">
+const ActiveCard = ({ job }: { job: JobResponse }) => (
+  <div className="bg-card-bg border border-accent/30 rounded-2xl p-5 flex flex-col sm:flex-row justify-between gap-4 shadow-sm shadow-accent/5">
     <div className="flex-1">
       <div className="flex items-center gap-2 mb-2">
-        <span className="text-xs font-bold text-accent bg-accent/10 px-2.5 py-0.5 rounded-full">
+        <span className="text-xs font-bold text-accent bg-accent/10 px-2.5 py-0.5 rounded-full uppercase tracking-wider">
           Active
         </span>
-        <span className="text-xs text-muted font-medium">{job.category}</span>
+        <span className="text-xs text-muted font-medium">
+          {job.categoryName}
+        </span>
       </div>
-      <h3 className="text-base font-bold text-primary mb-2">{job.title}</h3>
+      <h3 className="text-base font-bold text-primary mb-2">
+        {job.categoryName} Request
+      </h3>
+
       <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-text-dark">
         <span className="flex items-center gap-1.5">
           <IoLocationOutline className="text-muted" />
-          {job.location}
+          <span className="truncate max-w-50">{job.address}</span>
         </span>
         <span className="flex items-center gap-1.5">
           <IoTimeOutline className="text-muted" />
-          Due: {job.timeline}
+          Due: {job.urgency.replace("_", " ")}
         </span>
       </div>
-      {job.customerPhone && (
+
+      {job.contactNumber && (
         <a
-          href={`tel:${job.customerPhone}`}
-          className="inline-flex items-center gap-1.5 text-sm font-medium text-accent hover:text-accent/80 transition-colors mt-3"
+          href={`tel:${job.contactNumber}`}
+          className="inline-flex items-center gap-1.5 text-sm font-bold text-accent hover:text-accent/80 transition-colors mt-4 bg-accent/5 px-3 py-1.5 rounded-lg"
         >
           <IoCallOutline />
-          {job.customerPhone}
+          {job.contactNumber}
         </a>
       )}
     </div>
+
     <div className="flex flex-col items-end justify-between gap-3 shrink-0">
       <div className="text-right">
-        <p className="text-xs text-muted font-medium">Agreed quote</p>
+        <p className="text-xs text-muted font-medium uppercase tracking-wider">
+          Agreed quote
+        </p>
         <p className="text-lg font-bold text-primary">
-          Rs. {job.yourQuote.toLocaleString()}
+          Rs. {job.myBid?.quotedPrice?.toLocaleString() || 0}
         </p>
       </div>
       <SeButton
@@ -218,42 +119,44 @@ const ActiveCard = ({ job }: { job: IJob }) => (
   </div>
 );
 
-const CompletedCard = ({ job }: { job: IJob }) => (
-  <div className="bg-card-bg border border-light-gray rounded-2xl p-5 flex flex-col sm:flex-row justify-between gap-4 opacity-90">
+const CompletedCard = ({ job }: { job: JobResponse }) => (
+  <div className="bg-card-bg border border-light-gray rounded-2xl p-5 flex flex-col sm:flex-row justify-between gap-4 opacity-90 hover:opacity-100 transition-opacity">
     <div className="flex-1">
       <div className="flex items-center gap-2 mb-2">
-        <span className="text-xs font-bold text-muted bg-light-gray px-2.5 py-0.5 rounded-full">
+        <span className="text-xs font-bold text-muted bg-light-gray px-2.5 py-0.5 rounded-full uppercase tracking-wider">
           Completed
         </span>
         <span className="text-xs text-muted font-medium">
-          {job.completedAt}
+          {formatTimeAgo(job.myBid?.createdAt || job.createdAt)}
         </span>
       </div>
-      <h3 className="text-base font-bold text-primary mb-2">{job.title}</h3>
+      <h3 className="text-base font-bold text-primary mb-2">
+        {job.categoryName} Request
+      </h3>
+
       <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-text-dark">
         <span className="flex items-center gap-1.5">
           <IoLocationOutline className="text-muted" />
-          {job.location}
+          <span className="truncate max-w-50">{job.address}</span>
         </span>
-        <span className="text-sm text-muted">{job.customerName}</span>
+        <span className="text-sm text-muted font-medium border-l border-light-gray pl-4">
+          Client: {job.customerName}
+        </span>
       </div>
     </div>
+
     <div className="flex flex-col items-end justify-between gap-3 shrink-0">
       <div className="text-right">
-        <p className="text-xs text-muted font-medium">Earned</p>
-        <p className="text-lg font-bold text-primary">
-          Rs. {job.yourQuote.toLocaleString()}
+        <p className="text-xs text-muted font-medium uppercase tracking-wider">
+          Earned
+        </p>
+        <p className="text-lg font-bold text-green-600">
+          Rs. {job.myBid?.quotedPrice?.toLocaleString() || 0}
         </p>
       </div>
-      {job.isReviewed ? (
-        <div className="flex items-center gap-1 text-sm font-medium text-yellow-500">
-          {Array.from({ length: job.customerRating ?? 0 }).map((_, i) => (
-            <IoStarOutline key={i} />
-          ))}
-        </div>
-      ) : (
-        <span className="text-xs text-muted">No review yet</span>
-      )}
+
+      {/* Assuming you will add a reviews array/object to JobResponse later */}
+      <span className="text-xs text-muted">No review yet</span>
     </div>
   </div>
 );
@@ -261,9 +164,74 @@ const CompletedCard = ({ job }: { job: IJob }) => (
 // --- Page ---
 
 const MyJobsPage = () => {
-  const pending = mockJobs.filter((j) => j.status === "pending");
-  const active = mockJobs.filter((j) => j.status === "active");
-  const completed = mockJobs.filter((j) => j.status === "completed");
+  // Fetch real data
+  const { data: jobs, isLoading, isError } = useProviderJobs();
+
+  if (isLoading)
+    return (
+      <div className="p-8 text-center text-muted">Loading your jobs...</div>
+    );
+  if (isError)
+    return (
+      <div className="p-8 text-center text-red-500">Failed to load jobs.</div>
+    );
+
+  // Safeguard: Only process jobs where this provider actually has a bid
+  const myBiddedJobs = jobs?.filter((job) => job.myBid) || [];
+
+  // Categorize based on actual backend state
+  const pending = myBiddedJobs.filter(
+    (j) => j.myBid?.status === "PENDING" && j.status === "OPEN",
+  );
+  const active = myBiddedJobs.filter(
+    (j) => j.myBid?.status === "ACCEPTED" && j.status !== "COMPLETED",
+  );
+  const completed = myBiddedJobs.filter(
+    (j) => j.status === "COMPLETED" && j.myBid?.status === "ACCEPTED",
+  );
+
+  // Dynamic Earnings Summary
+  const totalEarned = completed.reduce(
+    (sum, j) => sum + (j.myBid?.quotedPrice || 0),
+    0,
+  );
+
+  // Calculate this month's earnings dynamically based on the bid's createdAt date
+  const currentMonth = new Date().getMonth();
+  const currentYear = new Date().getFullYear();
+  const thisMonthEarned = completed.reduce((sum, j) => {
+    const jobDate = new Date(j.myBid?.createdAt || j.createdAt);
+    if (
+      jobDate.getMonth() === currentMonth &&
+      jobDate.getFullYear() === currentYear
+    ) {
+      return sum + (j.myBid?.quotedPrice || 0);
+    }
+    return sum;
+  }, 0);
+
+  const earningsStats = [
+    {
+      label: "Total earned",
+      value: `Rs. ${totalEarned.toLocaleString()}`,
+      icon: <IoWalletOutline className="text-accent text-lg" />,
+    },
+    {
+      label: "This month",
+      value: `Rs. ${thisMonthEarned.toLocaleString()}`,
+      icon: <IoTrendingUpOutline className="text-accent text-lg" />,
+    },
+    {
+      label: "Active jobs",
+      value: active.length.toString(),
+      icon: <IoHourglassOutline className="text-accent text-lg" />,
+    },
+    {
+      label: "Avg. rating",
+      value: "4.8", // Hardcoded until backend supports reviews
+      icon: <IoStarOutline className="text-yellow-400 text-lg" />,
+    },
+  ];
 
   return (
     <div className="max-w-5xl mx-auto pb-12 p-4">
@@ -286,12 +254,25 @@ const MyJobsPage = () => {
             className="bg-card-bg border-light-gray"
           >
             <Group justify="space-between" align="flex-start" mb={8}>
-              <Text size="xs" c="dimmed" fw={500}>
+              <Text
+                size="xs"
+                c="dimmed"
+                fw={700}
+                className="uppercase tracking-wider"
+              >
                 {stat.label}
               </Text>
               {stat.icon}
             </Group>
-            <Text size="xl" fw={700} className="text-primary">
+            <Text
+              size="xl"
+              fw={700}
+              className={
+                stat.label.includes("Total") || stat.label.includes("month")
+                  ? "text-green-600"
+                  : "text-primary"
+              }
+            >
               {stat.value}
             </Text>
           </Paper>
@@ -299,12 +280,18 @@ const MyJobsPage = () => {
       </SimpleGrid>
 
       {/* Tabs */}
-      <Tabs defaultValue="active" variant="pills">
-        <Tabs.List className="mb-6 gap-1">
+      <Tabs
+        defaultValue="active"
+        variant="pills"
+        classNames={{
+          tab: "data-[active]:bg-accent data-[active]:text-white hover:bg-light-gray font-medium transition-colors",
+        }}
+      >
+        <Tabs.List className="mb-6 gap-2">
           <Tabs.Tab value="active">
             Active
             {active.length > 0 && (
-              <span className="ml-2 text-xs font-bold bg-accent text-white px-2 py-0.5 rounded-full">
+              <span className="ml-2 text-xs font-bold bg-white text-accent px-2 py-0.5 rounded-full shadow-sm">
                 {active.length}
               </span>
             )}
@@ -323,9 +310,10 @@ const MyJobsPage = () => {
         <Tabs.Panel value="active">
           <div className="grid gap-4">
             {active.length === 0 ? (
-              <p className="text-sm text-muted py-8 text-center">
-                No active jobs right now.
-              </p>
+              <div className="text-sm text-muted py-12 text-center border-2 border-dashed border-light-gray rounded-2xl">
+                No active jobs right now. Once a customer accepts your bid, it
+                will appear here.
+              </div>
             ) : (
               active.map((job) => <ActiveCard key={job.id} job={job} />)
             )}
@@ -335,9 +323,10 @@ const MyJobsPage = () => {
         <Tabs.Panel value="pending">
           <div className="grid gap-4">
             {pending.length === 0 ? (
-              <p className="text-sm text-muted py-8 text-center">
-                No pending bids right now.
-              </p>
+              <div className="text-sm text-muted py-12 text-center border-2 border-dashed border-light-gray rounded-2xl">
+                No pending bids right now. Head over to the lead feed to place
+                some quotes!
+              </div>
             ) : (
               pending.map((job) => <PendingCard key={job.id} job={job} />)
             )}
@@ -347,9 +336,9 @@ const MyJobsPage = () => {
         <Tabs.Panel value="completed">
           <div className="grid gap-4">
             {completed.length === 0 ? (
-              <p className="text-sm text-muted py-8 text-center">
-                No completed jobs yet.
-              </p>
+              <div className="text-sm text-muted py-12 text-center border-2 border-dashed border-light-gray rounded-2xl">
+                No completed jobs yet. Keep up the good work!
+              </div>
             ) : (
               completed.map((job) => <CompletedCard key={job.id} job={job} />)
             )}
