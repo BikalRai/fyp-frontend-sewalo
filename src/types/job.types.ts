@@ -1,4 +1,5 @@
 import type { ComponentType } from "react";
+import type { BidResponse } from "./bid.types";
 
 export interface IJobCategoryCard {
   id: string;
@@ -75,4 +76,6 @@ export interface JobResponse {
   bidCount: number;
   difficulty: "LOW" | "MEDIUM" | "HIGH";
   contactNumber: string | null;
+  isUnlocked: boolean;
+  myBid: BidResponse | null;
 }

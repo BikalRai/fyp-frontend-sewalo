@@ -13,6 +13,8 @@ import {
   IoStarOutline,
   IoFlashOutline,
   IoPersonOutline,
+  IoLockOpenOutline,
+  IoCheckmarkCircleOutline,
 } from "react-icons/io5";
 import { useNavigate } from "react-router-dom";
 
@@ -105,11 +107,6 @@ const JobLeadsPage = () => {
             3 new jobs near you today. 2 match your trades.
           </p>
         </div>
-        <SeButton
-          btnText="Edit profile"
-          variant="outline"
-          className="shrink-0 mt-1"
-        />
       </div>
 
       {/* stats card */}
@@ -213,15 +210,32 @@ const JobLeadsPage = () => {
               LOW: "bg-light-gray text-muted",
             }[lead.urgency] || "bg-light-gray text-muted";
 
-          // Determine text styling based on whether there is active competition
           const hasBids = lead.bidCount > 0;
           const bidText = lead.bidCount === 1 ? "Bid" : "Bids";
+
+          // --- THE NEW STATE LOGIC ---
+          const hasBid = Boolean(lead.myBid);
+          const isUnlocked = lead.isUnlocked;
+
+          // Determine card styling based on state
+          const cardBorder = hasBid
+            ? "border-green-500 shadow-green-500/10"
+            : isUnlocked
+              ? "border-accent/50 shadow-accent/5"
+              : "border-light-gray hover:border-accent";
+
+          const cardBg = hasBid ? "bg-green-50/30" : "bg-card-bg";
 
           return (
             <div
               key={lead.id}
-              className="bg-card-bg rounded-2xl border border-light-gray shadow-sm p-6 hover:border-accent transition-colors flex flex-col gap-4"
+              className={`${cardBg} rounded-2xl border ${cardBorder} shadow-sm p-6 transition-all duration-200 flex flex-col gap-4 relative overflow-hidden`}
             >
+              {/* Optional: A subtle background accent for submitted bids */}
+              {hasBid && (
+                <div className="absolute top-0 right-0 w-32 h-32 bg-green-500/5 rounded-bl-full pointer-events-none" />
+              )}
+
               <div className="flex justify-between items-start">
                 <div className="flex items-center gap-2 text-xs font-medium text-muted">
                   <span
@@ -229,14 +243,29 @@ const JobLeadsPage = () => {
                   >
                     {lead.urgency}
                   </span>
-                  <span className="w-1 h-1 rounded-full bg-light-gray"></span>
-                  <span className="bg-primary/5 px-2 py-1 rounded-2xl text-primary font-medium">
-                    {lead.distance} KM
-                  </span>
+
+                  {/* Status Badges */}
+                  {hasBid ? (
+                    <span className="flex items-center gap-1 text-green-600 bg-green-100 px-2.5 py-0.5 rounded-full font-bold uppercase tracking-wider">
+                      <IoCheckmarkCircleOutline size={14} />
+                      Quote Sent
+                    </span>
+                  ) : isUnlocked ? (
+                    <span className="flex items-center gap-1 text-accent bg-accent/10 px-2.5 py-0.5 rounded-full font-bold uppercase tracking-wider">
+                      <IoLockOpenOutline size={14} />
+                      Unlocked
+                    </span>
+                  ) : (
+                    <>
+                      <span className="w-1 h-1 rounded-full bg-light-gray"></span>
+                      <span className="bg-primary/5 px-2 py-1 rounded-2xl text-primary font-medium">
+                        {lead.distance} KM
+                      </span>
+                    </>
+                  )}
                 </div>
 
-                {/* Refactored Bid Count UI */}
-                <div className="flex items-center gap-1.5 text-xs font-medium">
+                <div className="flex items-center gap-1.5 text-xs font-medium z-10">
                   <IoPeopleOutline
                     className={hasBids ? "text-primary" : "text-muted"}
                     size={14}
@@ -251,7 +280,7 @@ const JobLeadsPage = () => {
                 </div>
               </div>
 
-              <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
+              <div className="flex flex-col sm:flex-row justify-between items-start gap-4 z-10">
                 <div className="flex-1 pr-0 sm:pr-4">
                   <h3 className="text-lg font-bold text-primary mb-1.5">
                     {lead.categoryName} Request
@@ -263,19 +292,26 @@ const JobLeadsPage = () => {
                 <div className="shrink-0 w-full sm:w-auto mt-2 sm:mt-0">
                   <SeButton
                     clickFunc={() => navigate(`/dashboard/leads/${lead.id}`)}
-                    btnText="View Details"
-                    variant="accentLight"
+                    // Button text changes based on what the user needs to do next
+                    btnText={
+                      hasBid
+                        ? "View Quote"
+                        : isUnlocked
+                          ? "Place Bid"
+                          : "View Details"
+                    }
+                    variant={hasBid ? "outline" : "accentLight"}
                     icon={<IoArrowForward className="text-lg" />}
                     iconPosition="right"
                   />
                 </div>
               </div>
 
-              <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm font-medium text-text-dark mt-1">
+              <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm font-medium text-text-dark mt-1 z-10">
                 <div className="flex items-center gap-1.5">
                   <IoLocationOutline className="text-muted text-lg shrink-0" />
                   <span className="truncate">
-                    {lead.address || "Address not provided"}
+                    {lead.address || "Address hidden"}
                   </span>
                 </div>
                 <div className="flex items-center gap-1.5">
@@ -283,7 +319,14 @@ const JobLeadsPage = () => {
                   <span>{formatTimeAgo(lead.createdAt)}</span>
                 </div>
 
-                <div className="font-bold text-primary">Budget TBD</div>
+                {/* Show the actual quote amount if they bid */}
+                {hasBid && lead.myBid ? (
+                  <div className="font-bold text-green-600">
+                    You Quoted: Rs. {lead.myBid.quotedPrice}
+                  </div>
+                ) : (
+                  <div className="font-bold text-primary">Budget TBD</div>
+                )}
               </div>
             </div>
           );
