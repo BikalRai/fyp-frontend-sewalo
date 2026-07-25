@@ -11,9 +11,12 @@ import {
   unlockJob,
 } from "@/services/job.service";
 import { uploadImagesToCloudinary } from "@/services/upload.service";
+import type { ApiErrorResponse } from "@/types/api.types";
 import type { PlaceBidRequestDto } from "@/types/bid.types";
 import type { CreateJobFormValues, CreateJobPayload } from "@/types/job.types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import type { AxiosError } from "axios";
+import { toast } from "sonner";
 
 // Home owner actions
 export const useCreateJob = () => {
@@ -103,6 +106,13 @@ export const useUnlockJob = () => {
     onSuccess: (_, id) => {
       queryClient.invalidateQueries({ queryKey: jobKeys.detail(id) });
       queryClient.invalidateQueries({ queryKey: jobKeys.lists() });
+    },
+    onError: (error: AxiosError<ApiErrorResponse>) => {
+      const errorMessage =
+        error.response?.data?.details ||
+        error.response?.data?.message ||
+        "Failed to unlock the job. Please try again.";
+      toast.error(errorMessage);
     },
   });
 };

@@ -48,3 +48,9 @@ export const bidKeys = {
 
   jobBids: (jobId: string) => ["bids", "job", jobId] as const,
 };
+
+export const notificationKeys = {
+  all: ["notifications"] as const,
+  recent: () => [...notificationKeys.all, "recent"] as const,
+  unreadCount: () => [...notificationKeys.all, "unread-count"] as const,
+};
