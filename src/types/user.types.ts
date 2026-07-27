@@ -5,7 +5,7 @@ import {
 } from "@/schemas/zod.schema";
 import { z } from "zod";
 
-export const roleEnumSchema = z.enum(["CUSTOMER", "PROVIDER"], {
+export const roleEnumSchema = z.enum(["CUSTOMER", "PROVIDER", "ADMIN"], {
   error: "Value of CUSTOMER / PROVIDER only",
 });
 

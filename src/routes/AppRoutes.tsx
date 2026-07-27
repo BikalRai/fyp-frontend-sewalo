@@ -23,15 +23,20 @@ import MessagesPage from "@/pages/dashboard/MessagesPage";
 import JobLeadsPage from "@/pages/dashboard/provider/JobLeadsPage";
 import JobLeadDetailsPage from "@/pages/dashboard/provider/JobLeadDetailsPage";
 import MyJobsPage from "@/pages/dashboard/provider/MyJobsPage";
+import BillingPage from "@/pages/dashboard/provider/BillingPage";
+import PaymentVerifyPage from "@/pages/dashboard/PaymentVerifyPage";
+import AdminProvidersPage from "@/pages/admin/AdminProvidersPage";
 
 interface RequireAuthProps {
   allowedRoles?: string[];
 }
 
 export const RequireAuth = ({ allowedRoles }: RequireAuthProps) => {
-  const { accessToken, role, isOnboarded, isActive } = useAuthStore();
+  const { accessToken, role, isOnboarded, isActive, hasHydrated } =
+    useAuthStore();
 
-  // verify if logged in
+  if (!hasHydrated) return null;
+
   if (!accessToken) {
     return <Navigate to="/auth/login" replace />;
   }
@@ -95,7 +100,7 @@ const router = createBrowserRouter([
   },
 
   {
-    element: <RequireAuth allowedRoles={["PROVIDER", "CUSTOMER"]} />,
+    element: <RequireAuth allowedRoles={["PROVIDER", "CUSTOMER", "ADMIN"]} />,
     children: [
       {
         path: "/auth/verify",
@@ -110,41 +115,25 @@ const router = createBrowserRouter([
             element: <RequireAuth allowedRoles={["CUSTOMER"]} />,
             children: [
               { path: "post-rfq", element: <DashboardRFQ /> },
-              {
-                path: "my-posts",
-                element: <MyPosts />,
-              },
-              {
-                path: "my-posts/:jobId",
-                element: <JobDetailsPage />,
-              },
+              { path: "my-posts", element: <MyPosts /> },
+              { path: "my-posts/:jobId", element: <JobDetailsPage /> },
             ],
           },
           {
             element: <RequireAuth allowedRoles={["PROVIDER"]} />,
             children: [
-              {
-                element: <JobLeadsPage />,
-                path: "leads",
-              },
-              {
-                element: <JobLeadDetailsPage />,
-                path: "leads/:id",
-              },
-              {
-                element: <MyJobsPage />,
-                path: "my-jobs",
-              },
+              { element: <JobLeadsPage />, path: "leads" },
+              { element: <JobLeadDetailsPage />, path: "leads/:id" },
+              { element: <MyJobsPage />, path: "my-jobs" },
+              { element: <BillingPage />, path: "billing" },
             ],
           },
           {
-            element: <Profile />,
-            path: "profile",
+            element: <RequireAuth allowedRoles={["ADMIN"]} />,
+            children: [{ path: "providers", element: <AdminProvidersPage /> }],
           },
-          {
-            element: <MessagesPage />,
-            path: "messages",
-          },
+          { element: <Profile />, path: "profile" },
+          { element: <MessagesPage />, path: "messages" },
         ],
       },
     ],
@@ -165,6 +154,10 @@ const router = createBrowserRouter([
       {
         path: "/provider-onboarding",
         element: <ProviderOnboardingFlow />,
+      },
+      {
+        element: <PaymentVerifyPage />,
+        path: "/payment/verify",
       },
     ],
   },

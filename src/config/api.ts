@@ -47,13 +47,7 @@ api.interceptors.response.use(
           { withCredentials: true },
         );
 
-        const { setAuth, role, userId, isActive } = useAuthStore.getState();
-        setAuth(
-          data.data.access_token,
-          role ?? data.data.role,
-          userId ?? data.data.userId,
-          isActive ?? data.data.isActive,
-        );
+        useAuthStore.getState().updateAccessToken(data.data.access_token);
         originalConfig.headers["Authorization"] =
           `Bearer ${data.data.access_token}`;
 

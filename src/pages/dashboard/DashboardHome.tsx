@@ -6,6 +6,7 @@ import CustomerDashboardHome from "@/features/dashboard/CustomerDashboardHome";
 import { useUserProfile } from "@/hooks/mutations/useUser";
 import { LuPlus } from "react-icons/lu";
 import { useNavigate } from "react-router-dom";
+import AdminDashboardHome from "../admin/AdminDashboardHome";
 
 const DashboardHome = () => {
   const { data: user, isLoading } = useUserProfile();
@@ -46,6 +47,7 @@ const DashboardHome = () => {
         </div>
         {user.role === "CUSTOMER" && <CustomerDashboardHome />}
         {user.role === "PROVIDER" && <ProviderDashboard />}
+        {user.role === "ADMIN" && <AdminDashboardHome />}
       </div>
     </div>
   );

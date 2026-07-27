@@ -7,6 +7,7 @@ interface AuthState {
   userId: string | null;
   isActive: boolean | null;
   isOnboarded: boolean | null;
+  hasHydrated: boolean;
   setAuth: (
     accessToken: string,
     role: string,
@@ -14,7 +15,9 @@ interface AuthState {
     isActive: boolean,
     isOnboarded?: boolean,
   ) => void;
+  updateAccessToken: (accessToken: string) => void;
   clearAuth: () => void;
+  setHasHydrated: (state: boolean) => void;
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -25,6 +28,7 @@ export const useAuthStore = create<AuthState>()(
       userId: null,
       isActive: null,
       isOnboarded: null,
+      hasHydrated: false,
       setAuth: (accessToken, role, userId, isActive, isOnboarded) =>
         set({
           accessToken,
@@ -33,6 +37,7 @@ export const useAuthStore = create<AuthState>()(
           isActive,
           isOnboarded,
         }),
+      updateAccessToken: (accessToken) => set({ accessToken }),
       clearAuth: () =>
         set({
           accessToken: null,
@@ -41,9 +46,13 @@ export const useAuthStore = create<AuthState>()(
           isActive: null,
           isOnboarded: null,
         }),
+      setHasHydrated: (state) => set({ hasHydrated: state }),
     }),
     {
       name: "sewalo-auth-storage",
+      onRehydrateStorage: () => (state) => {
+        state?.setHasHydrated(true);
+      },
     },
   ),
 );

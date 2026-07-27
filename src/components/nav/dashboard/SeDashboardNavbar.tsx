@@ -8,10 +8,12 @@ import {
   LuLogOut,
   LuMail,
   LuUser,
+  LuUsers,
+  LuWallet,
 } from "react-icons/lu";
 import { Link, useLocation } from "react-router-dom";
 
-export type NavRole = "CUSTOMER" | "PROVIDER";
+export type NavRole = "CUSTOMER" | "PROVIDER" | "ADMIN";
 
 export interface INavItem {
   label: string;
@@ -66,6 +68,24 @@ const navlinks: INavItem[] = [
     path: "messages",
     icon: LuMail,
     roles: ["CUSTOMER", "PROVIDER"],
+  },
+  {
+    label: "Wallet & Billing",
+    path: "billing",
+    icon: LuWallet,
+    roles: ["PROVIDER"],
+  },
+  {
+    label: "Admin Overview",
+    path: "/dashboard",
+    icon: LuHouse,
+    roles: ["ADMIN"],
+  },
+  {
+    label: "Pending Providers",
+    path: "providers",
+    icon: LuUsers,
+    roles: ["ADMIN"],
   },
 ];
 

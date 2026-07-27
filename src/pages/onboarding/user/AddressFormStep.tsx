@@ -169,7 +169,12 @@ const AddressFormStep = () => {
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  handleSearch();
+                }
+              }}
               placeholder="e.g. Baneshwor, Kathmandu"
               className="w-full pl-9 pr-4 py-3 rounded-xl border border-muted/30 text-sm text-text-dark placeholder:text-muted bg-white outline-none focus:border-accent transition-colors font-[Montserrat,sans-serif]"
             />
