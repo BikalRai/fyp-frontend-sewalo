@@ -54,3 +54,20 @@ export const notificationKeys = {
   recent: () => [...notificationKeys.all, "recent"] as const,
   unreadCount: () => [...notificationKeys.all, "unread-count"] as const,
 };
+
+export const billingKeys = {
+  // Base scope for all billing-related queries
+  all: ["billing"] as const,
+
+  // Specific key for the provider's credit balance
+  // Used in: useQuery({ queryKey: billingKeys.credits() })
+  credits: () => [...billingKeys.all, "credits"] as const,
+
+  // Specific key for tracking a payment verification attempt (if needed as a query)
+  // Used in: useMutation (or useQuery if polling) to tie the pidx to the cache
+  verification: (pidx: string) => [...billingKeys.all, "verify", pidx] as const,
+};
+
+export const adminKeys = {
+  pendingProviders: () => ["admin", "pending-providers"] as const,
+};

@@ -16,6 +16,7 @@ import type { PlaceBidRequestDto } from "@/types/bid.types";
 import type { CreateJobFormValues, CreateJobPayload } from "@/types/job.types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { AxiosError } from "axios";
+import axios from "axios";
 import { toast } from "sonner";
 
 // Home owner actions
@@ -137,6 +138,15 @@ export const usePlaceBid = () => {
         queryKey: jobKeys.detail(variables.jobId),
       });
       queryClient.invalidateQueries({ queryKey: jobKeys.lists() });
+    },
+    onError: (error) => {
+      if (axios.isAxiosError(error)) {
+        const message =
+          error.response?.data?.details ?? "Something went wrong.";
+        toast.error(message);
+      } else {
+        toast.error("Something went wrong.");
+      }
     },
   });
 };
