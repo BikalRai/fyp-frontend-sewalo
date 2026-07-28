@@ -11,6 +11,12 @@ export const postJob = async (
   return data.data;
 };
 
+export const getAllJobs = async (): Promise<JobResponse[]> => {
+  const { data } = await api.get("/jobs/admin/all");
+
+  return data.data;
+};
+
 export const getCustomerJobs = async (): Promise<JobResponse[]> => {
   const { data } = await api.get(`/jobs/my`);
 

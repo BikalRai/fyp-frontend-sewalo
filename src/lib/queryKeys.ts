@@ -28,6 +28,8 @@ export const jobKeys = {
   // the base key (invalidating this nukes everything related to jobs)
   all: ["jobs"] as const,
 
+  adminAll: () => [...jobKeys.lists(), "admin"] as const,
+
   // lists
   lists: () => [...jobKeys.all, "list"] as const,
 
