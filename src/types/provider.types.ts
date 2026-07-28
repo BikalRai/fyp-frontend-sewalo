@@ -11,6 +11,14 @@ export interface IProviderStep {
 
 export interface IProvider {
   id: string;
+  status:
+    | "DRAFT"
+    | "PENDING_APPROVAL"
+    | "APPROVED"
+    | "REJECTED"
+    | "SUBSCRIBED"
+    | "SUSPENDED";
+  rejectionReason?: string;
   gender: string;
   workDistrict: string[];
   bio: string;
@@ -22,14 +30,26 @@ export interface IProvider {
   user: UserProfileType;
 }
 
-// In types/provider.types.ts
+// --- Cloudinary & KYC Types ---
+export interface ICloudinarySignature {
+  signature: string;
+  timestamp: number | string;
+  apiKey: string;
+  cloudName: string;
+  folder: string; // Add this
+  type: string;
+}
+
+export interface IKycSubmissionPayload {
+  citizenshipFrontId: string;
+  citizenshipBackId: string;
+}
+
+// Replaced z.any() with a strict type-checked union
 export const providerPersonalDetails = z.object({
-  imageUrl: z
-    .any()
-    .refine(
-      (val) => val instanceof File || typeof val === "string",
-      "Profile image is required",
-    ),
+  imageUrl: z.union([z.instanceof(File), z.string()], {
+    error: () => ({ message: "Profile image is required" }),
+  }),
   phoneNumber: z.string(),
   gender: z.string(),
 });

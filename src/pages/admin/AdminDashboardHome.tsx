@@ -7,10 +7,12 @@ import {
 } from "react-icons/lu";
 import SeSpinner from "@/components/spinner/SeSpinner";
 import { useNavigate } from "react-router-dom";
+import { useGetAllJobs } from "@/hooks/mutations/useJob";
 
 const AdminDashboardHome = () => {
   const navigate = useNavigate();
   const { data: pendingProviders, isLoading } = usePendingProviders();
+  const { data: jobs } = useGetAllJobs();
 
   if (isLoading) {
     return (
@@ -39,7 +41,7 @@ const AdminDashboardHome = () => {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {/* Card 1: Pending Approvals */}
         <div
-          onClick={() => navigate("/admin/providers")}
+          onClick={() => navigate("/dashboard/providers")}
           className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm hover:border-primary transition-all cursor-pointer group"
         >
           <div className="flex items-center justify-between mb-4">
@@ -91,7 +93,9 @@ const AdminDashboardHome = () => {
             </div>
           </div>
           <div className="flex items-baseline gap-2">
-            <span className="text-3xl font-extrabold text-gray-900">--</span>
+            <span className="text-3xl font-extrabold text-gray-900">
+              {jobs?.length ?? 0}
+            </span>
             <span className="text-xs text-blue-600 font-semibold bg-blue-50 px-2 py-0.5 rounded-full">
               Live Feed
             </span>
@@ -130,8 +134,8 @@ const AdminDashboardHome = () => {
           </p>
         </div>
         <button
-          onClick={() => navigate("/admin/providers")}
-          className="bg-accent hover:bg-accent/90 text-primary font-bold px-6 py-3 rounded-xl transition-colors shrink-0 shadow-sm"
+          onClick={() => navigate("/dashboard/providers")}
+          className="bg-accent hover:bg-accent/90 text-light font-bold px-6 py-3 rounded-xl transition-colors shrink-0 shadow-sm cursor-pointer"
         >
           View Approvals Queue
         </button>

@@ -171,7 +171,7 @@ const SeDashboardNavbar = ({ role }: INavBarProp) => {
             px-3 py-2.5 rounded-lg
             text-light/40 hover:text-light hover:bg-white/5
             transition-colors duration-200
-            disabled:opacity-50 disabled:cursor-not-allowed
+            disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer
           "
         >
           <LuLogOut size={17} className="shrink-0" />

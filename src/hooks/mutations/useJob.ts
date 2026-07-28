@@ -1,6 +1,7 @@
 import { jobKeys } from "@/lib/queryKeys";
 import {
   cancelJobPost,
+  getAllJobs,
   getCustomerJobById,
   getCustomerJobs,
   getJobLead,
@@ -47,6 +48,13 @@ export const useCreateJob = () => {
       // 4. Invalidate the cache to trigger an automatic refetch
       queryClient.invalidateQueries({ queryKey: jobKeys.lists() });
     },
+  });
+};
+
+export const useGetAllJobs = () => {
+  return useQuery({
+    queryKey: jobKeys.adminAll(),
+    queryFn: getAllJobs,
   });
 };
 
