@@ -1,6 +1,7 @@
 import { z } from "zod";
 import type { UserProfileType } from "./user.types";
 import type { Path } from "react-hook-form";
+import type { IRating } from "./job.types";
 
 export interface IProviderStep {
   title: string;
@@ -92,3 +93,13 @@ export const masterProviderSchema = providerPersonalDetails
   .merge(providerWorkAreaSchema);
 
 export type MasterProviderType = z.infer<typeof masterProviderSchema>;
+
+export interface IPublicProviderProfile {
+  providerId: string;
+  fullName: string;
+  imageUrl: string | null;
+  services: string[];
+  avgRating: number | null;
+  ratingCount: number;
+  recentReviews: IRating[];
+}

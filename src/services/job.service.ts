@@ -1,6 +1,12 @@
 import { api } from "@/config/api";
 import type { PlaceBidRequestDto } from "@/types/bid.types";
-import type { CreateJobPayload, JobResponse } from "@/types/job.types";
+import type {
+  CompleteJobPayload,
+  CreateJobPayload,
+  IProviderStats,
+  IRating,
+  JobResponse,
+} from "@/types/job.types";
 
 // customer/home owner
 export const postJob = async (
@@ -65,6 +71,38 @@ export const placeBid = async (
 
 export const getProviderJobsList = async (): Promise<JobResponse[]> => {
   const { data } = await api.get("/jobs/my/job-list");
+
+  return data.data;
+};
+
+export const completeJob = async (
+  jobId: string,
+  payload: CompleteJobPayload,
+): Promise<JobResponse> => {
+  const { data } = await api.patch(`/jobs/${jobId}/complete`, payload);
+
+  return data.data;
+};
+
+export const confirmJobCompletion = async (
+  jobId: string,
+): Promise<JobResponse> => {
+  const { data } = await api.patch(`/jobs/${jobId}/confirm-completion`);
+
+  return data.data;
+};
+
+export const getProviderStats = async (): Promise<IProviderStats> => {
+  const { data } = await api.get("/jobs/my/stats");
+
+  return data.data;
+};
+
+export const submitRating = async (
+  jobId: string,
+  payload: { score: number; review?: string },
+): Promise<IRating> => {
+  const { data } = await api.post(`/ratings/${jobId}/rate`, payload);
 
   return data.data;
 };

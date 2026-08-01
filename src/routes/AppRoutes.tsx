@@ -26,6 +26,7 @@ import MyJobsPage from "@/pages/dashboard/provider/MyJobsPage";
 import BillingPage from "@/pages/dashboard/provider/BillingPage";
 import PaymentVerifyPage from "@/pages/dashboard/PaymentVerifyPage";
 import AdminProvidersPage from "@/pages/admin/AdminProvidersPage";
+import ProviderPublicProfilePage from "@/pages/ProviderPublicProfilePage";
 
 interface RequireAuthProps {
   allowedRoles?: string[];
@@ -117,6 +118,10 @@ const router = createBrowserRouter([
               { path: "post-rfq", element: <DashboardRFQ /> },
               { path: "my-posts", element: <MyPosts /> },
               { path: "my-posts/:jobId", element: <JobDetailsPage /> },
+              {
+                path: "providers/:providerId",
+                element: <ProviderPublicProfilePage />,
+              },
             ],
           },
           {

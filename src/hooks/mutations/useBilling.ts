@@ -7,13 +7,18 @@ import {
 import { billingKeys } from "@/lib/queryKeys";
 import type { PurchaseType } from "@/types/billing.types";
 import type { ApiErrorResponse } from "@/types/api.types";
+import { getEffectiveSubscription } from "@/lib/subscription";
 
 export const useProviderCredits = () => {
-  return useQuery({
+  const query = useQuery({
     queryKey: billingKeys.credits(),
     queryFn: getProviderCredits,
     staleTime: 1000 * 60 * 5,
   });
+
+  const subscription = getEffectiveSubscription(query.data);
+
+  return { ...query, ...subscription };
 };
 
 export const useInitiatePayment = () => {

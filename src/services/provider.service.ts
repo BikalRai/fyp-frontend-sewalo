@@ -4,6 +4,7 @@ import type {
   ProvderPersonalDetailsType,
   ICloudinarySignature,
   IKycSubmissionPayload,
+  IPublicProviderProfile,
 } from "@/types/provider.types";
 import axios from "axios";
 
@@ -57,4 +58,11 @@ export const submitKycDocuments = async (
 ): Promise<void> => {
   const { data } = await api.post("/providers/kyc", payload);
   return data;
+};
+
+export const getPublicProviderProfile = async (
+  providerId: string,
+): Promise<IPublicProviderProfile> => {
+  const { data } = await api.get(`${PROVIDER_PREFIX}/${providerId}/public`);
+  return data.data;
 };

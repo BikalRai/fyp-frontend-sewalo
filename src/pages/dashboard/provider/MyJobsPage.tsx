@@ -1,4 +1,17 @@
-import { Tabs, SimpleGrid, Paper, Text, Group } from "@mantine/core";
+import { useState } from "react";
+import {
+  Tabs,
+  SimpleGrid,
+  Paper,
+  Text,
+  Group,
+  Modal,
+  Textarea,
+  FileInput,
+  Stack,
+  LoadingOverlay,
+  Box,
+} from "@mantine/core";
 import {
   IoTimeOutline,
   IoLocationOutline,
@@ -8,13 +21,17 @@ import {
   IoTrendingUpOutline,
   IoWalletOutline,
   IoStarOutline,
+  IoCloudUploadOutline,
 } from "react-icons/io5";
 import SeButton from "@/components/button/SeButton";
 import { formatTimeAgo } from "@/uitls/job.utils";
 import type { JobResponse } from "@/types/job.types";
-import { useProviderJobs } from "@/hooks/mutations/useJob";
+import { useCompleteJob, useProviderJobs } from "@/hooks/mutations/useJob";
+import { uploadImagesToCloudinary } from "@/services/upload.service";
+import { useProviderStats } from "@/hooks/mutations/useProvider";
 
 // --- Sub-components per tab ---
+// (PendingCard, ActiveCard, and CompletedCard remain EXACTLY the same)
 
 const PendingCard = ({ job }: { job: JobResponse }) => (
   <div className="bg-card-bg border border-light-gray rounded-2xl p-5 flex flex-col sm:flex-row justify-between gap-4 hover:border-accent transition-colors">
@@ -63,7 +80,13 @@ const PendingCard = ({ job }: { job: JobResponse }) => (
   </div>
 );
 
-const ActiveCard = ({ job }: { job: JobResponse }) => (
+const ActiveCard = ({
+  job,
+  onMarkComplete,
+}: {
+  job: JobResponse;
+  onMarkComplete: (job: JobResponse) => void;
+}) => (
   <div className="bg-card-bg border border-accent/30 rounded-2xl p-5 flex flex-col sm:flex-row justify-between gap-4 shadow-sm shadow-accent/5">
     <div className="flex-1">
       <div className="flex items-center gap-2 mb-2">
@@ -114,6 +137,7 @@ const ActiveCard = ({ job }: { job: JobResponse }) => (
         variant="accentLight"
         icon={<IoCheckmarkCircleOutline className="text-lg" />}
         iconPosition="left"
+        clickFunc={() => onMarkComplete(job)}
       />
     </div>
   </div>
@@ -150,12 +174,10 @@ const CompletedCard = ({ job }: { job: JobResponse }) => (
         <p className="text-xs text-muted font-medium uppercase tracking-wider">
           Earned
         </p>
-        <p className="text-lg font-bold text-green-600">
+        <p className="text-lg font-bold text-accent">
           Rs. {job.myBid?.quotedPrice?.toLocaleString() || 0}
         </p>
       </div>
-
-      {/* Assuming you will add a reviews array/object to JobResponse later */}
       <span className="text-xs text-muted">No review yet</span>
     </div>
   </div>
@@ -164,8 +186,61 @@ const CompletedCard = ({ job }: { job: JobResponse }) => (
 // --- Page ---
 
 const MyJobsPage = () => {
-  // Fetch real data
   const { data: jobs, isLoading, isError } = useProviderJobs();
+  const { data: stats } = useProviderStats();
+
+  // Wire up your actual API hook
+  const { mutateAsync: completeJob, isPending: isSubmitting } =
+    useCompleteJob();
+
+  // --- MODAL STATE ---
+  const [jobToComplete, setJobToComplete] = useState<JobResponse | null>(null);
+  const [completionNotes, setCompletionNotes] = useState("");
+  const [files, setFiles] = useState<File[]>([]);
+
+  // NEW: Track the image upload process separately
+  const [isUploadingImages, setIsUploadingImages] = useState(false);
+
+  // Combine both states so the UI stays locked from start to finish
+  const isProcessing = isSubmitting || isUploadingImages;
+
+  const closeModal = () => {
+    if (isProcessing) return; // Prevent closing while processing
+    setJobToComplete(null);
+    setCompletionNotes("");
+    setFiles([]);
+    setIsUploadingImages(false);
+  };
+
+  const handleCompleteSubmit = async () => {
+    if (!jobToComplete) return;
+
+    try {
+      let uploadedImageUrls: string[] = [];
+
+      // 1. Upload files to Cloudinary if the provider selected any
+      if (files.length > 0) {
+        setIsUploadingImages(true); // Lock the UI for uploads
+        uploadedImageUrls = await uploadImagesToCloudinary(files);
+        setIsUploadingImages(false); // Unlock upload state
+      }
+
+      // 2. Fire the mutation with the exact payload Spring Boot is expecting
+      await completeJob({
+        jobId: jobToComplete.id,
+        payload: {
+          completionNotes: completionNotes,
+          completionImages: uploadedImageUrls,
+        },
+      });
+
+      // 3. Close the modal and reset state on success
+      closeModal();
+    } catch (error) {
+      setIsUploadingImages(false); // Ensure UI unlocks on upload failure
+      console.error("Completion failed:", error);
+    }
+  };
 
   if (isLoading)
     return (
@@ -173,13 +248,11 @@ const MyJobsPage = () => {
     );
   if (isError)
     return (
-      <div className="p-8 text-center text-red-500">Failed to load jobs.</div>
+      <div className="p-8 text-center text-danger">Failed to load jobs.</div>
     );
 
-  // Safeguard: Only process jobs where this provider actually has a bid
   const myBiddedJobs = jobs?.filter((job) => job.myBid) || [];
 
-  // Categorize based on actual backend state
   const pending = myBiddedJobs.filter(
     (j) => j.myBid?.status === "PENDING" && j.status === "OPEN",
   );
@@ -190,45 +263,25 @@ const MyJobsPage = () => {
     (j) => j.status === "COMPLETED" && j.myBid?.status === "ACCEPTED",
   );
 
-  // Dynamic Earnings Summary
-  const totalEarned = completed.reduce(
-    (sum, j) => sum + (j.myBid?.quotedPrice || 0),
-    0,
-  );
-
-  // Calculate this month's earnings dynamically based on the bid's createdAt date
-  const currentMonth = new Date().getMonth();
-  const currentYear = new Date().getFullYear();
-  const thisMonthEarned = completed.reduce((sum, j) => {
-    const jobDate = new Date(j.myBid?.createdAt || j.createdAt);
-    if (
-      jobDate.getMonth() === currentMonth &&
-      jobDate.getFullYear() === currentYear
-    ) {
-      return sum + (j.myBid?.quotedPrice || 0);
-    }
-    return sum;
-  }, 0);
-
   const earningsStats = [
     {
       label: "Total earned",
-      value: `Rs. ${totalEarned.toLocaleString()}`,
+      value: `Rs. ${(stats?.totalEarned ?? 0).toLocaleString()}`,
       icon: <IoWalletOutline className="text-accent text-lg" />,
     },
     {
       label: "This month",
-      value: `Rs. ${thisMonthEarned.toLocaleString()}`,
+      value: `Rs. ${(stats?.thisMonthEarned ?? 0).toLocaleString()}`,
       icon: <IoTrendingUpOutline className="text-accent text-lg" />,
     },
     {
       label: "Active jobs",
-      value: active.length.toString(),
+      value: (stats?.activeJobs ?? 0).toString(),
       icon: <IoHourglassOutline className="text-accent text-lg" />,
     },
     {
       label: "Avg. rating",
-      value: "4.8", // Hardcoded until backend supports reviews
+      value: stats?.avgRating != null ? stats.avgRating.toFixed(1) : "—",
       icon: <IoStarOutline className="text-yellow-400 text-lg" />,
     },
   ];
@@ -269,7 +322,7 @@ const MyJobsPage = () => {
               fw={700}
               className={
                 stat.label.includes("Total") || stat.label.includes("month")
-                  ? "text-green-600"
+                  ? "text-accent"
                   : "text-primary"
               }
             >
@@ -284,14 +337,14 @@ const MyJobsPage = () => {
         defaultValue="active"
         variant="pills"
         classNames={{
-          tab: "data-[active]:bg-accent data-[active]:text-white hover:bg-light-gray font-medium transition-colors",
+          tab: "text-muted font-medium hover:bg-light-gray transition-colors data-[active]:!bg-accent data-[active]:!text-white data-[active]:hover:bg-primary/90 rounded-full px-5 py-2",
         }}
       >
-        <Tabs.List className="mb-6 gap-2">
+        <Tabs.List className="mb-6 gap-2 border-b-0">
           <Tabs.Tab value="active">
             Active
             {active.length > 0 && (
-              <span className="ml-2 text-xs font-bold bg-white text-accent px-2 py-0.5 rounded-full shadow-sm">
+              <span className="ml-2 text-xs font-bold px-2 py-0.5 rounded-full shadow-sm bg-primary text-white group-data-[active]:!bg-white/30 group-data-[active]:!text-white">
                 {active.length}
               </span>
             )}
@@ -299,7 +352,7 @@ const MyJobsPage = () => {
           <Tabs.Tab value="pending">
             Pending
             {pending.length > 0 && (
-              <span className="ml-2 text-xs font-bold bg-light-gray text-muted px-2 py-0.5 rounded-full">
+              <span className="ml-2 text-xs font-bold px-2 py-0.5 rounded-full shadow-sm bg-primary text-white group-data-[active]:!bg-white/30 group-data-[active]:!text-white">
                 {pending.length}
               </span>
             )}
@@ -310,12 +363,18 @@ const MyJobsPage = () => {
         <Tabs.Panel value="active">
           <div className="grid gap-4">
             {active.length === 0 ? (
-              <div className="text-sm text-muted py-12 text-center border-2 border-dashed border-light-gray rounded-2xl">
+              <div className="text-sm text-muted py-12 text-center border-2 border-dashed border-light-gray rounded-2xl bg-light">
                 No active jobs right now. Once a customer accepts your bid, it
                 will appear here.
               </div>
             ) : (
-              active.map((job) => <ActiveCard key={job.id} job={job} />)
+              active.map((job) => (
+                <ActiveCard
+                  key={job.id}
+                  job={job}
+                  onMarkComplete={setJobToComplete}
+                />
+              ))
             )}
           </div>
         </Tabs.Panel>
@@ -323,7 +382,7 @@ const MyJobsPage = () => {
         <Tabs.Panel value="pending">
           <div className="grid gap-4">
             {pending.length === 0 ? (
-              <div className="text-sm text-muted py-12 text-center border-2 border-dashed border-light-gray rounded-2xl">
+              <div className="text-sm text-muted py-12 text-center border-2 border-dashed border-light-gray rounded-2xl bg-light">
                 No pending bids right now. Head over to the lead feed to place
                 some quotes!
               </div>
@@ -336,7 +395,7 @@ const MyJobsPage = () => {
         <Tabs.Panel value="completed">
           <div className="grid gap-4">
             {completed.length === 0 ? (
-              <div className="text-sm text-muted py-12 text-center border-2 border-dashed border-light-gray rounded-2xl">
+              <div className="text-sm text-muted py-12 text-center border-2 border-dashed border-light-gray rounded-2xl bg-light">
                 No completed jobs yet. Keep up the good work!
               </div>
             ) : (
@@ -345,6 +404,106 @@ const MyJobsPage = () => {
           </div>
         </Tabs.Panel>
       </Tabs>
+
+      {/* Completion Modal */}
+      <Modal
+        opened={!!jobToComplete}
+        onClose={closeModal}
+        closeOnClickOutside={!isProcessing} // Prevent accidental close while loading
+        closeOnEscape={!isProcessing}
+        withCloseButton={!isProcessing}
+        title={
+          <Text fw={700} size="lg" className="text-primary">
+            Complete Job
+          </Text>
+        }
+        centered
+        radius="lg"
+        overlayProps={{
+          backgroundOpacity: 0.55,
+          blur: 3,
+        }}
+      >
+        {/* NEW: Box pos="relative" to contain the LoadingOverlay */}
+        <Box pos="relative">
+          <LoadingOverlay
+            visible={isProcessing}
+            zIndex={1000}
+            overlayProps={{ radius: "sm", blur: 2 }}
+            loaderProps={{ color: "var(--color-accent)", type: "bars" }}
+          />
+
+          <Stack gap="md">
+            <Text size="sm" className="text-muted">
+              You are about to mark the{" "}
+              <Text span fw={700} className="text-primary">
+                {jobToComplete?.categoryName}
+              </Text>{" "}
+              job for {jobToComplete?.customerName} as complete.
+            </Text>
+
+            <Textarea
+              label={
+                <Text size="sm" fw={600} className="text-text-dark mb-1">
+                  Completion Notes (Optional)
+                </Text>
+              }
+              placeholder="e.g., Fixed the leak under the sink, checked all seals."
+              value={completionNotes}
+              onChange={(e) => setCompletionNotes(e.currentTarget.value)}
+              maxLength={500}
+              minRows={3}
+              autosize
+              classNames={{ input: "border-light-gray focus:border-accent" }}
+              disabled={isProcessing}
+            />
+
+            <FileInput
+              label={
+                <Text size="sm" fw={600} className="text-text-dark mb-1">
+                  Proof of Work (Optional)
+                </Text>
+              }
+              description={
+                <Text size="xs" component="span" className="text-muted mb-2">
+                  Upload up to 5 images for your portfolio and dispute
+                  protection.
+                </Text>
+              }
+              placeholder="Click to select images"
+              multiple
+              accept="image/png,image/jpeg,image/webp"
+              leftSection={<IoCloudUploadOutline className="text-muted" />}
+              value={files}
+              onChange={setFiles}
+              clearable
+              classNames={{ input: "border-light-gray focus:border-accent" }}
+              disabled={isProcessing}
+            />
+
+            <Group justify="flex-end" mt="md">
+              <SeButton
+                btnText="Cancel"
+                variant="outline"
+                clickFunc={closeModal}
+                disabled={isProcessing}
+              />
+              <SeButton
+                btnText={
+                  isUploadingImages
+                    ? "Uploading Images..."
+                    : isSubmitting
+                      ? "Completing..."
+                      : "Confirm Completion"
+                }
+                variant="primary"
+                clickFunc={handleCompleteSubmit}
+                disabled={isProcessing}
+              />
+            </Group>
+          </Stack>
+        </Box>
+      </Modal>
     </div>
   );
 };

@@ -4,6 +4,12 @@ import type {
 } from "@/types/billing.types";
 import { LuCheck, LuZap } from "react-icons/lu";
 
+const TIER_RANK: Record<SubscriptionTier, number> = {
+  FREE: 0,
+  PRO: 1,
+  BUSINESS: 2,
+};
+
 interface SubscriptionGridProps {
   plans: ISubscriptionPlan[];
   activeTier: SubscriptionTier;
@@ -26,7 +32,10 @@ const SubscriptionGrid = ({
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {plans.map((plan) => {
-          const isCurrentPlan = activeTier === plan.tier;
+          const currentRank = TIER_RANK[activeTier];
+          const planRank = TIER_RANK[plan.tier];
+          const isCurrentPlan = planRank === currentRank;
+          const isLowerTier = planRank < currentRank;
 
           return (
             <div
@@ -69,25 +78,31 @@ const SubscriptionGrid = ({
               </div>
 
               <div className="mt-8">
-                <button
-                  disabled={isCurrentPlan}
-                  onClick={() => onUpgrade(plan)}
-                  className={`w-full py-2.5 rounded-lg text-sm font-semibold transition-colors flex items-center justify-center gap-2 ${
-                    isCurrentPlan
-                      ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                      : plan.isPopular
-                        ? "bg-primary text-white hover:bg-primary/90"
-                        : "bg-gray-900 text-white hover:bg-gray-800"
-                  }`}
-                >
-                  {isCurrentPlan ? (
-                    "Current Plan"
-                  ) : (
-                    <>
-                      <LuZap size={16} /> Upgrade to {plan.name}
-                    </>
-                  )}
-                </button>
+                {isLowerTier ? (
+                  <p className="text-center text-xs text-gray-400 py-2.5">
+                    Included in your current plan
+                  </p>
+                ) : (
+                  <button
+                    disabled={isCurrentPlan}
+                    onClick={() => onUpgrade(plan)}
+                    className={`w-full py-2.5 rounded-lg text-sm font-semibold transition-colors flex items-center justify-center gap-2 ${
+                      isCurrentPlan
+                        ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                        : plan.isPopular
+                          ? "bg-primary text-white hover:bg-primary/90 cursor-pointer"
+                          : "bg-gray-900 text-white hover:bg-gray-800 cursor-pointer"
+                    }`}
+                  >
+                    {isCurrentPlan ? (
+                      "Current Plan"
+                    ) : (
+                      <>
+                        <LuZap size={16} /> Upgrade to {plan.name}
+                      </>
+                    )}
+                  </button>
+                )}
               </div>
             </div>
           );

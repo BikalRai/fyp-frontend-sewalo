@@ -1,6 +1,8 @@
-import { providerKeys } from "@/lib/queryKeys";
+import { jobKeys, providerKeys } from "@/lib/queryKeys";
+import { getProviderStats } from "@/services/job.service";
 import {
   getProviderProfile,
+  getPublicProviderProfile,
   updateProviderPersonalDetails,
 } from "@/services/provider.service";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -28,5 +30,20 @@ export const useUpdateProviderPersonal = () => {
       console.error(err);
       toast.error(err.message);
     },
+  });
+};
+
+export const useProviderStats = () => {
+  return useQuery({
+    queryKey: jobKeys.stats(),
+    queryFn: getProviderStats,
+  });
+};
+
+export const usePublicProviderProfile = (providerId: string) => {
+  return useQuery({
+    queryKey: providerKeys.details(providerId),
+    queryFn: () => getPublicProviderProfile(providerId),
+    enabled: !!providerId,
   });
 };

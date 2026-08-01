@@ -16,44 +16,48 @@ export interface ISubscriptionPlan {
 export const SUBSCRIPTION_PLANS: ISubscriptionPlan[] = [
   {
     id: "plan_free",
-    tier: "FREE",
     name: "Pay As You Go",
+    tier: "FREE",
     monthlyPriceRs: 0,
-    includedTokens: 0,
-    tokenDiscountPriceRs: 45,
+    isPopular: false,
+    includedTokens: 0, // Added
+    tokenDiscountPriceRs: 45, // Added
     features: [
       "Standard lead visibility",
+      "Leads delayed by 5 minutes",
       "Pay Rs 45 per unlocked lead",
       "Basic support",
     ],
   },
   {
     id: "plan_pro",
-    tier: "PRO",
     name: "Pro Partner",
+    tier: "PRO",
     monthlyPriceRs: 500,
-    includedTokens: 15, // Value: Rs 675
-    tokenDiscountPriceRs: 35,
+    isPopular: true,
+    includedTokens: 15, // Added
+    tokenDiscountPriceRs: 35, // Added
     features: [
       "15 included leads / month",
+      "Instant lead notifications",
       "Discounted leads (Rs 35/ea)",
       "Pro Profile Badge",
-      "Priority customer support",
     ],
-    isPopular: true,
   },
   {
-    id: "plan_biz",
-    tier: "BUSINESS",
+    id: "plan_business",
     name: "Verified Business",
+    tier: "BUSINESS",
     monthlyPriceRs: 1500,
-    includedTokens: 50, // Value: Rs 2,250
-    tokenDiscountPriceRs: 25,
+    isPopular: false,
+    includedTokens: 50, // Added
+    tokenDiscountPriceRs: 25, // Added
     features: [
       "50 included leads / month",
+      "Instant lead notifications",
       "Lowest lead price (Rs 25/ea)",
-      "Verified Business Badge",
       "Top placement in search results",
+      "Verified Business Badge",
     ],
   },
 ];

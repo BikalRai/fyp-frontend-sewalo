@@ -20,9 +20,13 @@ const BillingPage = () => {
   const [selectedPackage, setSelectedPackage] = useState<number>(10);
   const TOKEN_PACKAGES = [5, 10, 20, 50];
 
-  // TanStack Query Hooks
-  const { data: creditsData, isLoading: isCreditsLoading } =
-    useProviderCredits();
+  const {
+    data: creditsData,
+    isLoading: isCreditsLoading,
+    effectiveTier,
+  } = useProviderCredits();
+
+  console.log(creditsData, "DATA");
   const initiatePayment = useInitiatePayment();
   const verifyPayment = useVerifyPayment();
 
@@ -97,8 +101,9 @@ const BillingPage = () => {
   };
 
   const currentBalance = creditsData?.balance || 0;
-  // Hardcoded for now until backend subscription logic is ready
-  const currentTokenRateRs = 45;
+
+  const currentPlan = SUBSCRIPTION_PLANS.find((p) => p.tier === effectiveTier);
+  const currentTokenRateRs = currentPlan?.tokenDiscountPriceRs ?? 45;
 
   return (
     <div className="max-w-5xl mx-auto p-4 lg:p-8 space-y-10">
@@ -189,7 +194,7 @@ const BillingPage = () => {
 
       <SubscriptionGrid
         plans={SUBSCRIPTION_PLANS}
-        activeTier="FREE" // Hardcoded to FREE until backend is ready
+        activeTier={effectiveTier}
         onUpgrade={handleSubscriptionUpgrade}
       />
     </div>
