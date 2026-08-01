@@ -63,7 +63,15 @@ export interface JobResponse {
   categoryName: string;
   categoryIcon: string;
   urgency: "LOW" | "MEDIUM" | "HIGH" | "EMERGENCY" | string; // Update to match your Urgency enum
-  status: "OPEN" | "IN_PROGRESS" | "COMPLETED" | "CANCELLED" | string; // Update to match JobStatus enum
+  status:
+    | "OPEN"
+    | "ANALYZING"
+    | "IN_PROGRESS"
+    | "AWAITING_CONFIRMATION"
+    | "COMPLETED"
+    | "CANCELLED"
+    | "EXPIRED"
+    | "FAILED";
   images: string[];
   createdAt: string;
   expiresAt: string;
@@ -78,4 +86,29 @@ export interface JobResponse {
   contactNumber: string | null;
   isUnlocked: boolean;
   myBid: BidResponse | null;
+  rating: IRating | null;
+}
+
+export interface CompleteJobPayload {
+  completionNotes?: string;
+  completionImages?: string[];
+}
+
+export interface IProviderStats {
+  totalEarned: number;
+  thisMonthEarned: number;
+  activeJobs: number;
+  avgRating: number | null;
+  ratingCount: number;
+}
+
+export interface IRating {
+  id: string;
+  jobId: string;
+  providerId: string;
+  customerId: string;
+  customerName: string;
+  score: number;
+  review: string | null;
+  createdAt: string;
 }

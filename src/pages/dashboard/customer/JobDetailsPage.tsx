@@ -1,5 +1,6 @@
 import SeButton from "@/components/button/SeButton";
 import ReceivedBidsList from "@/features/bid/ReceivedBidsList";
+import JobRatingSection from "@/features/rating/JobRatingSection";
 import {
   useCancelJobPost,
   useCustomerJobDetail,
@@ -131,6 +132,7 @@ const JobDetailsPage = () => {
         </div>
 
         <ReceivedBidsList jobId={jobId!} />
+        <JobRatingSection job={job} />
       </div>
     </>
   );

@@ -7,6 +7,10 @@ import type { APIResponse } from "./api.types";
 export interface IProviderCreditsData {
   providerId: string;
   balance: number;
+  activeTier: SubscriptionTier;
+  createdAt: Date;
+  updatedAt: Date;
+  subscriptionExpiresAt: Date;
 }
 
 /**

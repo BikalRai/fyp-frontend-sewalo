@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { useJobBids, useAcceptBid } from "@/hooks/mutations/useBid";
 import SeButton from "@/components/button/SeButton";
 import { formatTimeAgo } from "@/uitls/job.utils";
@@ -41,11 +42,9 @@ const ReceivedBidsList = ({ jobId }: ReceivedBidsListProps) => {
     );
   }
 
-  // Segregate the data based on status
   const acceptedBid = bids.find((bid) => bid.status === "ACCEPTED");
   const otherBids = bids.filter((bid) => bid.status !== "ACCEPTED");
 
-  // Reusable card renderer
   const renderBidCard = (bid: BidResponse, isHired: boolean) => (
     <div
       key={bid.id}
@@ -58,22 +57,30 @@ const ReceivedBidsList = ({ jobId }: ReceivedBidsListProps) => {
       <div className="flex flex-col lg:flex-row justify-between gap-6">
         <div className="flex-1">
           <div className="flex items-center gap-4 mb-4">
-            {bid.providerImageUrl ? (
-              <img
-                src={bid.providerImageUrl}
-                alt={bid.providerName}
-                className="w-12 h-12 rounded-full object-cover shadow-sm"
-              />
-            ) : (
-              <div className="w-12 h-12 bg-primary text-white rounded-full flex items-center justify-center font-bold text-lg shadow-sm">
-                {bid.providerName.charAt(0)}
-              </div>
-            )}
+            <Link
+              to={`/dashboard/providers/${bid.providerId}`}
+              className="w-12 h-12 shrink-0 hover:opacity-80 transition-opacity"
+            >
+              {bid.providerImageUrl ? (
+                <img
+                  src={bid.providerImageUrl}
+                  alt={bid.providerName}
+                  className="w-12 h-12 rounded-full object-cover shadow-sm"
+                />
+              ) : (
+                <div className="w-12 h-12 bg-primary text-white rounded-full flex items-center justify-center font-bold text-lg shadow-sm">
+                  {bid.providerName.charAt(0)}
+                </div>
+              )}
+            </Link>
             <div>
               <div className="flex items-center gap-2">
-                <h3 className="font-bold text-primary text-base">
+                <Link
+                  to={`/dashboard/providers/${bid.providerId}`}
+                  className="font-bold text-primary text-base hover:underline"
+                >
                   {bid.providerName}
-                </h3>
+                </Link>
                 {isHired && (
                   <span className="bg-green-100 text-green-700 text-small font-bold uppercase tracking-wider py-1 px-2 rounded flex items-center gap-1">
                     <IoRibbonOutline /> Hired
@@ -112,7 +119,6 @@ const ReceivedBidsList = ({ jobId }: ReceivedBidsListProps) => {
           </div>
 
           <div className="flex flex-col sm:flex-row gap-3 w-full">
-            {/* Show Message button only if evaluating, OR if this is the hired pro */}
             {(!acceptedBid || isHired) && (
               <SeButton
                 btnText="Message"
@@ -122,7 +128,6 @@ const ReceivedBidsList = ({ jobId }: ReceivedBidsListProps) => {
               />
             )}
 
-            {/* Show Hire Pro button only if no one is hired yet */}
             {!acceptedBid && (
               <SeButton
                 btnText="Hire Pro"
@@ -143,7 +148,6 @@ const ReceivedBidsList = ({ jobId }: ReceivedBidsListProps) => {
 
   return (
     <div>
-      {/* State 1: A professional has been hired */}
       {acceptedBid ? (
         <div className="space-y-8">
           <div>
@@ -153,7 +157,6 @@ const ReceivedBidsList = ({ jobId }: ReceivedBidsListProps) => {
             {renderBidCard(acceptedBid, true)}
           </div>
 
-          {/* Render remaining bids as non-actionable history */}
           {otherBids.length > 0 && (
             <div className="opacity-75">
               <h3 className="text-md font-semibold text-muted mb-4 border-b border-light-gray pb-2">
@@ -166,7 +169,6 @@ const ReceivedBidsList = ({ jobId }: ReceivedBidsListProps) => {
           )}
         </div>
       ) : (
-        /* State 2: Active Evaluation Phase */
         <div>
           <h2 className="text-lg font-bold text-primary mb-5 flex items-center gap-2">
             Received Quotes

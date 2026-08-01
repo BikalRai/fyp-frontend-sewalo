@@ -1,6 +1,8 @@
 import { jobKeys } from "@/lib/queryKeys";
 import {
   cancelJobPost,
+  completeJob,
+  confirmJobCompletion,
   getAllJobs,
   getCustomerJobById,
   getCustomerJobs,
@@ -9,12 +11,17 @@ import {
   getProviderJobsList,
   placeBid,
   postJob,
+  submitRating,
   unlockJob,
 } from "@/services/job.service";
 import { uploadImagesToCloudinary } from "@/services/upload.service";
 import type { ApiErrorResponse } from "@/types/api.types";
 import type { PlaceBidRequestDto } from "@/types/bid.types";
-import type { CreateJobFormValues, CreateJobPayload } from "@/types/job.types";
+import type {
+  CompleteJobPayload,
+  CreateJobFormValues,
+  CreateJobPayload,
+} from "@/types/job.types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { AxiosError } from "axios";
 import axios from "axios";
@@ -92,6 +99,37 @@ export const useCancelJobPost = () => {
   });
 };
 
+export const useConfirmJobCompletion = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: confirmJobCompletion,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: jobKeys.customerHistory() });
+    },
+  });
+};
+
+export const useSubmitRating = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      jobId,
+      payload,
+    }: {
+      jobId: string;
+      payload: { score: number; review?: string };
+    }) => submitRating(jobId, payload),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: jobKeys.detail(variables.jobId),
+      });
+      queryClient.invalidateQueries({ queryKey: jobKeys.customerHistory() });
+    },
+  });
+};
+
 // provider
 export const useJobLeads = () => {
   return useQuery({
@@ -146,6 +184,34 @@ export const usePlaceBid = () => {
         queryKey: jobKeys.detail(variables.jobId),
       });
       queryClient.invalidateQueries({ queryKey: jobKeys.lists() });
+    },
+    onError: (error) => {
+      if (axios.isAxiosError(error)) {
+        const message =
+          error.response?.data?.details ?? "Something went wrong.";
+        toast.error(message);
+      } else {
+        toast.error("Something went wrong.");
+      }
+    },
+  });
+};
+
+export const useCompleteJob = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      jobId,
+      payload,
+    }: {
+      jobId: string;
+      payload: CompleteJobPayload;
+    }) => completeJob(jobId, payload),
+    onSuccess: () => {
+      // Invalidate both lists and details to ensure UI syncs everywhere
+      queryClient.invalidateQueries({ queryKey: jobKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: jobKeys.details() });
     },
     onError: (error) => {
       if (axios.isAxiosError(error)) {
