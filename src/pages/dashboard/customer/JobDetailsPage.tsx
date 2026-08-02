@@ -1,5 +1,6 @@
 import SeButton from "@/components/button/SeButton";
 import ReceivedBidsList from "@/features/bid/ReceivedBidsList";
+import AiInsightCard from "@/features/job/components/AiInsightCard";
 import JobRatingSection from "@/features/rating/JobRatingSection";
 import {
   useCancelJobPost,
@@ -129,6 +130,7 @@ const JobDetailsPage = () => {
               {job.description}
             </p>
           </div>
+          <AiInsightCard analysis={job.aiAnalysis} />
         </div>
 
         <ReceivedBidsList jobId={jobId!} />

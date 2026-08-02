@@ -5,6 +5,7 @@ import type {
   ICloudinarySignature,
   IKycSubmissionPayload,
   IPublicProviderProfile,
+  ProviderProfileUpdateType,
 } from "@/types/provider.types";
 import axios from "axios";
 
@@ -20,7 +21,7 @@ export const updateProviderPersonalDetails = async (
 
 export const getProviderProfile = async (): Promise<IProvider> => {
   const { data } = await api.get(`${PROVIDER_PREFIX}/me`);
-  return data.data; // Assumes your backend wraps the response in APIResponse
+  return data.data;
 };
 
 // 1. Get the signature from your backend
@@ -64,5 +65,12 @@ export const getPublicProviderProfile = async (
   providerId: string,
 ): Promise<IPublicProviderProfile> => {
   const { data } = await api.get(`${PROVIDER_PREFIX}/${providerId}/public`);
+  return data.data;
+};
+
+export const updateProviderProfile = async (
+  payload: ProviderProfileUpdateType,
+): Promise<IProvider> => {
+  const { data } = await api.patch(`${PROVIDER_PREFIX}/me`, payload);
   return data.data;
 };

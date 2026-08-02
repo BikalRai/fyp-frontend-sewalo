@@ -12,6 +12,7 @@ import {
   LuWallet,
 } from "react-icons/lu";
 import { Link, useLocation } from "react-router-dom";
+import { useWebSocketStore } from "@/store/useWebSocketStore"; // <-- NEW IMPORT
 
 export type NavRole = "CUSTOMER" | "PROVIDER" | "ADMIN";
 
@@ -91,12 +92,12 @@ const navlinks: INavItem[] = [
 
 const SeDashboardNavbar = ({ role }: INavBarProp) => {
   const location = useLocation();
-
   const roleBasedLinks = navlinks.filter((link) => link.roles.includes(role));
-
   const { mutate: userLogout, isPending } = useLogout();
-
   const currentPath = location.pathname;
+
+  // <-- NEW: Pull state and action from Zustand
+  const { hasUnreadMessages, setHasUnreadMessages } = useWebSocketStore();
 
   return (
     <nav className="flex flex-col h-full py-6 bg-primary w-16 lg:w-60 transition-all duration-300">
@@ -117,11 +118,21 @@ const SeDashboardNavbar = ({ role }: INavBarProp) => {
             link.path === "/dashboard"
               ? currentPath === "/dashboard"
               : currentPath.includes(link.path);
+
+          // <-- NEW: Check if this specific link is the Messages link
+          const isMessages = link.label === "Messages";
+
           return (
             <Link
               key={i}
               to={link.path}
               title={link.label} // native tooltip — shows on tablet hover
+              onClick={() => {
+                // <-- NEW: Clear the red dot when they click the Messages link
+                if (isMessages) {
+                  setHasUnreadMessages(false);
+                }
+              }}
               className={`
                 group relative flex items-center gap-3 text-sm font-medium
                 px-3 py-2.5 rounded-lg transition-colors duration-200
@@ -132,7 +143,15 @@ const SeDashboardNavbar = ({ role }: INavBarProp) => {
                 }
               `}
             >
-              <link.icon size={17} className="shrink-0" />
+              {/* <-- NEW: Wrapped the icon in a relative div to pin the dot to it */}
+              <div className="relative inline-flex items-center justify-center">
+                <link.icon size={17} className="shrink-0" />
+
+                {/* The Unread Ping Indicator */}
+                {isMessages && hasUnreadMessages && (
+                  <span className="absolute -top-1 -right-1.5 w-2.5 h-2.5 bg-red-500 rounded-full animate-pulse border-[1.5px] border-primary" />
+                )}
+              </div>
 
               {/* Label — hidden on tablet, visible on desktop */}
               <span className="hidden lg:block truncate">{link.label}</span>

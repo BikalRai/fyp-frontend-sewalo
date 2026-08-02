@@ -22,6 +22,7 @@ import {
   IoWalletOutline,
   IoStarOutline,
   IoCloudUploadOutline,
+  IoChatbubbleEllipsesOutline,
 } from "react-icons/io5";
 import SeButton from "@/components/button/SeButton";
 import { formatTimeAgo } from "@/uitls/job.utils";
@@ -29,6 +30,7 @@ import type { JobResponse } from "@/types/job.types";
 import { useCompleteJob, useProviderJobs } from "@/hooks/mutations/useJob";
 import { uploadImagesToCloudinary } from "@/services/upload.service";
 import { useProviderStats } from "@/hooks/mutations/useProvider";
+import { useNavigate } from "react-router-dom";
 
 // --- Sub-components per tab ---
 // (PendingCard, ActiveCard, and CompletedCard remain EXACTLY the same)
@@ -86,62 +88,89 @@ const ActiveCard = ({
 }: {
   job: JobResponse;
   onMarkComplete: (job: JobResponse) => void;
-}) => (
-  <div className="bg-card-bg border border-accent/30 rounded-2xl p-5 flex flex-col sm:flex-row justify-between gap-4 shadow-sm shadow-accent/5">
-    <div className="flex-1">
-      <div className="flex items-center gap-2 mb-2">
-        <span className="text-xs font-bold text-accent bg-accent/10 px-2.5 py-0.5 rounded-full uppercase tracking-wider">
-          Active
-        </span>
-        <span className="text-xs text-muted font-medium">
-          {job.categoryName}
-        </span>
-      </div>
-      <h3 className="text-base font-bold text-primary mb-2">
-        {job.categoryName} Request
-      </h3>
+}) => {
+  const navigate = useNavigate();
 
-      <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-text-dark">
-        <span className="flex items-center gap-1.5">
-          <IoLocationOutline className="text-muted" />
-          <span className="truncate max-w-50">{job.address}</span>
-        </span>
-        <span className="flex items-center gap-1.5">
-          <IoTimeOutline className="text-muted" />
-          Due: {job.urgency.replace("_", " ")}
-        </span>
+  return (
+    <div
+      onClick={() => navigate(`/dashboard/leads/${job.id}`)}
+      className="bg-card-bg border border-accent/30 rounded-2xl p-5 flex flex-col sm:flex-row justify-between gap-4 shadow-sm shadow-accent/5 cursor-pointer hover:border-accent transition-colors"
+    >
+      <div className="flex-1">
+        <div className="flex items-center gap-2 mb-2">
+          <span className="text-xs font-bold text-accent bg-accent/10 px-2.5 py-0.5 rounded-full uppercase tracking-wider">
+            Active
+          </span>
+          <span className="text-xs text-muted font-medium">
+            {job.categoryName}
+          </span>
+        </div>
+        <h3 className="text-base font-bold text-primary mb-2">
+          {job.categoryName} Request
+        </h3>
+
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-text-dark">
+          <span className="flex items-center gap-1.5">
+            <IoLocationOutline className="text-muted" />
+            <span className="truncate max-w-50">{job.address}</span>
+          </span>
+          <span className="flex items-center gap-1.5">
+            <IoTimeOutline className="text-muted" />
+            Due: {job.urgency.replace("_", " ")}
+          </span>
+        </div>
+
+        {job.contactNumber && (
+          <a
+            href={`tel:${job.contactNumber}`}
+            onClick={(e) => e.stopPropagation()} // Prevent card click when clicking phone number
+            className="inline-flex items-center gap-1.5 text-sm font-bold text-accent hover:text-accent/80 transition-colors mt-4 bg-accent/5 px-3 py-1.5 rounded-lg"
+          >
+            <IoCallOutline />
+            {job.contactNumber}
+          </a>
+        )}
       </div>
 
-      {job.contactNumber && (
-        <a
-          href={`tel:${job.contactNumber}`}
-          className="inline-flex items-center gap-1.5 text-sm font-bold text-accent hover:text-accent/80 transition-colors mt-4 bg-accent/5 px-3 py-1.5 rounded-lg"
-        >
-          <IoCallOutline />
-          {job.contactNumber}
-        </a>
-      )}
+      <div className="flex flex-col items-end justify-between gap-3 shrink-0">
+        <div className="text-right">
+          <p className="text-xs text-muted font-medium uppercase tracking-wider">
+            Agreed quote
+          </p>
+          <p className="text-lg font-bold text-primary">
+            Rs. {job.myBid?.quotedPrice?.toLocaleString() || 0}
+          </p>
+        </div>
+
+        {/* NEW: Button Group */}
+        <div className="flex flex-wrap items-center gap-2 justify-end">
+          <SeButton
+            btnText="Message"
+            variant="outline"
+            size="sm"
+            icon={<IoChatbubbleEllipsesOutline className="text-lg" />}
+            iconPosition="left"
+            clickFunc={(e) => {
+              e.stopPropagation(); // Prevents the card click
+              navigate(`/dashboard/jobs/${job.id}/chat`);
+            }}
+          />
+          <SeButton
+            btnText="Mark as complete"
+            variant="accentLight"
+            size="sm"
+            icon={<IoCheckmarkCircleOutline className="text-lg" />}
+            iconPosition="left"
+            clickFunc={(e) => {
+              e.stopPropagation(); // Prevents the card click
+              onMarkComplete(job);
+            }}
+          />
+        </div>
+      </div>
     </div>
-
-    <div className="flex flex-col items-end justify-between gap-3 shrink-0">
-      <div className="text-right">
-        <p className="text-xs text-muted font-medium uppercase tracking-wider">
-          Agreed quote
-        </p>
-        <p className="text-lg font-bold text-primary">
-          Rs. {job.myBid?.quotedPrice?.toLocaleString() || 0}
-        </p>
-      </div>
-      <SeButton
-        btnText="Mark as complete"
-        variant="accentLight"
-        icon={<IoCheckmarkCircleOutline className="text-lg" />}
-        iconPosition="left"
-        clickFunc={() => onMarkComplete(job)}
-      />
-    </div>
-  </div>
-);
+  );
+};
 
 const CompletedCard = ({ job }: { job: JobResponse }) => (
   <div className="bg-card-bg border border-light-gray rounded-2xl p-5 flex flex-col sm:flex-row justify-between gap-4 opacity-90 hover:opacity-100 transition-opacity">

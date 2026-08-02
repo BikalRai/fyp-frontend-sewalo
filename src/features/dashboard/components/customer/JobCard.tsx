@@ -101,9 +101,13 @@ const JobCard = ({ job }: JobCardProps) => {
             <IoHammer className="w-4 h-4" />
             <span>{job.categoryName}</span>
           </div>
-          <div className="flex items-center gap-1.5">
+          <div
+            className="flex items-center gap-1.5"
+            title="Providers preparing quotes"
+          >
             <LuUsers className="w-4 h-4" />
-            <span>{job.bidCount}/3</span>
+            {/* Option A: Show how many providers have unlocked it */}
+            <span>{job.unlockCount}/3 Interested</span>
           </div>
           <div className="flex items-center gap-1.5">
             <LuClock className="w-4 h-4" />

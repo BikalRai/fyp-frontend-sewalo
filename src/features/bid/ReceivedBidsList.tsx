@@ -1,4 +1,5 @@
-import { Link } from "react-router-dom";
+// 1. <-- NEW: Import useNavigate at the top
+import { Link, useNavigate } from "react-router-dom";
 import { useJobBids, useAcceptBid } from "@/hooks/mutations/useBid";
 import SeButton from "@/components/button/SeButton";
 import { formatTimeAgo } from "@/uitls/job.utils";
@@ -15,6 +16,8 @@ interface ReceivedBidsListProps {
 }
 
 const ReceivedBidsList = ({ jobId }: ReceivedBidsListProps) => {
+  const navigate = useNavigate(); // 2. <-- NEW: Initialize the hook
+
   const { data: bids, isLoading, isError } = useJobBids(jobId);
   const { mutate: acceptBid, isPending, variables } = useAcceptBid(jobId);
 
@@ -55,6 +58,7 @@ const ReceivedBidsList = ({ jobId }: ReceivedBidsListProps) => {
       }`}
     >
       <div className="flex flex-col lg:flex-row justify-between gap-6">
+        {/* ... (keep your existing provider info layout) ... */}
         <div className="flex-1">
           <div className="flex items-center gap-4 mb-4">
             <Link
@@ -125,6 +129,8 @@ const ReceivedBidsList = ({ jobId }: ReceivedBidsListProps) => {
                 type="button"
                 variant={isHired ? "accentLight" : "lightGray"}
                 className="flex-1 whitespace-nowrap"
+                // 3. <-- NEW: Actually fire the navigation when clicked!
+                clickFunc={() => navigate(`/dashboard/jobs/${jobId}/chat`)}
               />
             )}
 
@@ -146,6 +152,7 @@ const ReceivedBidsList = ({ jobId }: ReceivedBidsListProps) => {
     </div>
   );
 
+  // ... (keep the rest of your return statement the same)
   return (
     <div>
       {acceptedBid ? (

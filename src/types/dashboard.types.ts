@@ -8,5 +8,5 @@ export interface IStatCardProps {
 export interface ProviderDashboardStatProps {
   title: string;
   Icon: React.ElementType;
-  metric: number;
+  metric: number | string;
 }
