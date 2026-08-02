@@ -1,12 +1,17 @@
-import { useForm } from "react-hook-form";
+import { useEffect, useMemo } from "react";
+import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useLocationStore } from "@/store/jobStore";
 import AddressFormStep from "@/pages/onboarding/user/AddressFormStep";
 import {
-  providerProfileSchema,
+  useProviderProfile,
+  useUpdateProviderProfile,
+} from "@/hooks/mutations/useProvider";
+import { useProviderCredits } from "@/hooks/mutations/useBilling";
+import {
+  providerProfileFormSchema,
   type ProviderProfileFormType,
-} from "@/types/profile.types";
-import type { ProviderResponseType } from "@/types/user.types";
+} from "@/types/provider.types";
 import {
   IoPersonOutline,
   IoConstructOutline,
@@ -15,316 +20,446 @@ import {
   IoWalletOutline,
   IoSparklesOutline,
 } from "react-icons/io5";
+import { useUserProfile } from "@/hooks/mutations/useUser";
 
-interface Props {
-  initialData: ProviderResponseType;
-}
+const servicesList = [
+  "Plumbing",
+  "Electrical",
+  "Cleaning",
+  "Carpentry",
+  "Painting",
+  "Moving",
+  "Tutoring",
+  "Beauty",
+];
 
-// Mock plan data — swap with real data when backend is ready
-const mockPlan = {
-  name: "Starter",
-  tokensRemaining: 3,
-  tokensTotal: 5,
-};
+const districts = ["Kathmandu", "Lalitpur", "Bhaktapur"];
 
-const ProviderProfileSettings = ({ initialData }: Props) => {
-  // ---- ALL LOGIC UNCHANGED ----
-  const { location } = useLocationStore();
+const ProviderProfileSettings = () => {
+  const { setLocation, location } = useLocationStore();
+  const { mutate: updateProfile, isPending } = useUpdateProviderProfile();
+  const { data: credits } = useProviderCredits();
+
+  const { data: userProfile } = useUserProfile();
+  const isProvider = userProfile?.role === "PROVIDER";
+  const { data: provider } = useProviderProfile(isProvider);
+
+  const formValues = useMemo(() => {
+    return {
+      phoneNumber:
+        provider?.user?.phoneNumber || userProfile?.phoneNumber || "",
+      // Add .trim() to ensure a stray space from the DB doesn't break the dropdown mapping
+      experience: provider?.experience?.trim() || "",
+      bio: provider?.bio || "",
+      services: provider?.services || [],
+      workArea: provider?.workDistrict || [],
+      pricingBasis: provider?.pricingBasis?.trim() || "",
+      startingRate: provider?.startingRate ? Number(provider.startingRate) : 0,
+    };
+  }, [provider, userProfile]);
 
   const {
     register,
     handleSubmit,
-    formState: { errors, isSubmitting },
+    control,
+    formState: { errors },
   } = useForm<ProviderProfileFormType>({
-    resolver: zodResolver(providerProfileSchema),
+    resolver: zodResolver(providerProfileFormSchema),
+    // IMPORTANT: Provide empty defaultValues.
+    // This forces RHF to track the <select> element before the async data arrives.
     defaultValues: {
-      phoneNumber: initialData?.phoneNumber || "",
-      experience: initialData?.experience || "",
-      bio: initialData?.bio || "",
-      services: initialData?.services ? initialData.services.join(", ") : "",
-      pricingBasis: initialData?.pricingBasis || undefined,
-      startingRate: initialData?.startingRate || 0 || null,
+      phoneNumber: "",
+      experience: "",
+      bio: "",
+      services: [],
+      workArea: [],
+      pricingBasis: "",
+      startingRate: 0,
     },
+    values: formValues, // This will dynamically overwrite defaultValues once the data loads
   });
 
-  const onSubmit = async (data: ProviderProfileFormType) => {
-    if (!location.lat || !location.lng) {
-      console.warn("Please pin your base of operations on the map.");
-      return;
-    }
-    const formattedServices = data.services
-      .split(",")
-      .map((s) => s.trim())
-      .filter((s) => s.length > 0);
-    const payload = {
+  const onSubmit = (data: ProviderProfileFormType) => {
+    if (!location.lat || !location.lng) return;
+
+    updateProfile({
       ...data,
-      services: formattedServices,
       latitude: location.lat,
       longitude: location.lng,
       address: location.address,
-    };
-    console.log("Valid Provider Payload to API:", payload);
-    // updateProvider(payload);
+      imageUrl: userProfile?.imageUrl || "",
+    });
   };
-  // ---- END LOGIC ----
+
+  useEffect(() => {
+    const initialLat = provider?.latitude || userProfile?.lat;
+    const initialLng = provider?.longitude || userProfile?.lng;
+    const initialAddress = provider?.address || userProfile?.address || "";
+
+    // CHANGED: Check if address is empty, not lat
+    if (!location.address && initialLat && initialLng) {
+      setLocation(initialLat, initialLng, initialAddress);
+    }
+  }, [provider, userProfile, location.address, setLocation]);
 
   const inputClass = (hasError: boolean) =>
-    `w-full px-4 py-3 rounded-xl border text-sm text-text-dark outline-none transition-colors bg-light ${
-      hasError ? "border-soft-danger" : "border-light-gray focus:border-accent"
+    `w-full px-4 py-2.5 rounded-lg border text-sm text-text-dark outline-none transition-colors bg-white ${
+      hasError
+        ? "border-soft-danger"
+        : "border-light-gray focus:border-accent focus:ring-1 focus:ring-accent/20"
     }`;
+
+  const tokenBalance = credits?.balance ?? 0;
+  const activeTier = credits?.activeTier ?? "FREE";
 
   return (
     <form
       onSubmit={handleSubmit(onSubmit)}
-      className="max-w-3xl grid gap-6 pb-10"
+      className="max-w-5xl mx-auto grid gap-12 pb-16 pt-6"
     >
       {/* 1. Professional Identity */}
-      <div className="bg-card-bg rounded-2xl border border-light-gray shadow-sm overflow-hidden">
-        <div className="flex items-center gap-3 px-6 py-4 border-b border-light-gray">
-          <div className="w-8 h-8 rounded-lg bg-accent/10 flex items-center justify-center shrink-0">
-            <IoPersonOutline className="text-accent text-base" />
-          </div>
-          <div>
-            <h3 className="text-sm font-bold text-primary">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-12">
+        <div className="md:col-span-1">
+          <div className="flex items-center gap-2 mb-2">
+            <IoPersonOutline className="text-accent text-lg" />
+            <h3 className="text-base font-semibold text-primary">
               Professional Identity
             </h3>
-            <p className="text-xs text-muted">How customers will know you</p>
           </div>
+          <p className="text-sm text-muted">
+            This information will be displayed publicly so customers can
+            identify and trust your services.
+          </p>
         </div>
 
-        <div className="px-6 py-5 grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="grid gap-1.5">
-            <label className="text-[11px] font-bold tracking-widest text-muted uppercase">
-              Phone Number
-            </label>
-            <input
-              {...register("phoneNumber")}
-              type="tel"
-              className={inputClass(!!errors.phoneNumber)}
-            />
-            {errors.phoneNumber && (
-              <span className="text-xs text-soft-danger">
-                {errors.phoneNumber.message}
-              </span>
-            )}
-          </div>
+        <div className="md:col-span-2 bg-card-bg rounded-2xl border border-light-gray shadow-sm overflow-hidden p-6 sm:p-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid gap-2">
+              <label className="text-xs font-semibold text-primary uppercase tracking-wide">
+                Phone Number
+              </label>
+              <input
+                {...register("phoneNumber")}
+                type="tel"
+                className={inputClass(!!errors.phoneNumber)}
+              />
+              {errors.phoneNumber && (
+                <span className="text-xs text-soft-danger">
+                  {errors.phoneNumber.message}
+                </span>
+              )}
+            </div>
 
-          <div className="grid gap-1.5">
-            <label className="text-[11px] font-bold tracking-widest text-muted uppercase">
-              Experience Level
-            </label>
-            <select
-              {...register("experience")}
-              className={inputClass(!!errors.experience)}
-            >
-              <option value="">Select experience</option>
-              <option value="BEGINNER">Beginner (0–2 yrs)</option>
-              <option value="INTERMEDIATE">Intermediate (3–5 yrs)</option>
-              <option value="EXPERT">Expert (5+ yrs)</option>
-            </select>
-            {errors.experience && (
-              <span className="text-xs text-soft-danger">
-                {errors.experience.message}
-              </span>
-            )}
-          </div>
+            <div className="grid gap-2">
+              <label className="text-xs font-semibold text-primary uppercase tracking-wide">
+                Experience Level
+              </label>
+              <select
+                {...register("experience")}
+                className={inputClass(!!errors.experience)}
+              >
+                <option value="">Select experience</option>
+                <option value="1-2">1-2 years</option>
+                <option value="3-5">3-5 years</option>
+                <option value="5-10">5-10 years</option>
+                <option value="10+">10+ years</option>
+              </select>
+              {errors.experience && (
+                <span className="text-xs text-soft-danger">
+                  {errors.experience.message}
+                </span>
+              )}
+            </div>
 
-          <div className="grid gap-1.5 md:col-span-2">
-            <label className="text-[11px] font-bold tracking-widest text-muted uppercase">
-              Bio
-            </label>
-            <textarea
-              {...register("bio")}
-              rows={4}
-              placeholder="Tell customers about your expertise..."
-              className={`${inputClass(!!errors.bio)} resize-none`}
-            />
-            {errors.bio && (
-              <span className="text-xs text-soft-danger">
-                {errors.bio.message}
-              </span>
-            )}
+            <div className="grid gap-2 md:col-span-2">
+              <label className="text-xs font-semibold text-primary uppercase tracking-wide">
+                Bio
+              </label>
+              <textarea
+                {...register("bio")}
+                rows={4}
+                placeholder="Tell customers about your expertise..."
+                className={`${inputClass(!!errors.bio)} resize-none`}
+              />
+              {errors.bio && (
+                <span className="text-xs text-soft-danger">
+                  {errors.bio.message}
+                </span>
+              )}
+            </div>
           </div>
         </div>
       </div>
+
+      <hr className="border-light-gray" />
 
       {/* 2. Services & Rates */}
-      <div className="bg-card-bg rounded-2xl border border-light-gray shadow-sm overflow-hidden">
-        <div className="flex items-center gap-3 px-6 py-4 border-b border-light-gray">
-          <div className="w-8 h-8 rounded-lg bg-accent/10 flex items-center justify-center shrink-0">
-            <IoConstructOutline className="text-accent text-base" />
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-12">
+        <div className="md:col-span-1">
+          <div className="flex items-center gap-2 mb-2">
+            <IoConstructOutline className="text-accent text-lg" />
+            <h3 className="text-base font-semibold text-primary">
+              Services & Rates
+            </h3>
           </div>
-          <div>
-            <h3 className="text-sm font-bold text-primary">Services & Rates</h3>
-            <p className="text-xs text-muted">
-              What you offer and what you charge
-            </p>
-          </div>
+          <p className="text-sm text-muted">
+            Define your core offerings, operational areas, and pricing strategy.
+          </p>
         </div>
 
-        <div className="px-6 py-5 grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="grid gap-1.5 md:col-span-2">
-            <label className="text-[11px] font-bold tracking-widest text-muted uppercase">
-              Services Offered
-            </label>
-            <input
-              {...register("services")}
-              type="text"
-              placeholder="e.g. Plumbing, Pipe Fitting, Drain Cleaning"
-              className={inputClass(!!errors.services)}
-            />
-            <p className="text-xs text-muted">
-              Separate each service with a comma
-            </p>
-            {errors.services && (
-              <span className="text-xs text-soft-danger">
-                {errors.services.message}
-              </span>
-            )}
-          </div>
+        <div className="md:col-span-2 bg-card-bg rounded-2xl border border-light-gray shadow-sm overflow-hidden p-6 sm:p-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid gap-2 md:col-span-2">
+              <label className="text-xs font-semibold text-primary uppercase tracking-wide">
+                Services Offered
+              </label>
+              <Controller
+                name="services"
+                control={control}
+                render={({ field }) => {
+                  const handleToggle = (service: string) => {
+                    const currentValues = field.value || [];
+                    if (currentValues.includes(service)) {
+                      field.onChange(
+                        currentValues.filter(
+                          (item: string) => item !== service,
+                        ),
+                      );
+                    } else {
+                      field.onChange([...currentValues, service]);
+                    }
+                  };
 
-          <div className="grid gap-1.5">
-            <label className="text-[11px] font-bold tracking-widest text-muted uppercase">
-              Pricing Basis
-            </label>
-            <select
-              {...register("pricingBasis")}
-              className={inputClass(!!errors.pricingBasis)}
-            >
-              <option value="">Select basis</option>
-              <option value="VISIT">Minimum visit fee</option>
-              <option value="FIXED">Starting service price</option>
-            </select>
-            {errors.pricingBasis && (
-              <span className="text-xs text-soft-danger">
-                {errors.pricingBasis.message}
-              </span>
-            )}
-          </div>
-
-          <div className="grid gap-1.5">
-            <label className="text-[11px] font-bold tracking-widest text-muted uppercase">
-              Starting Rate (NPR)
-            </label>
-            <div className="relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted pointer-events-none">
-                Rs.
-              </span>
-              <input
-                {...register("startingRate", { valueAsNumber: true })}
-                type="number"
-                placeholder="500"
-                className={`${inputClass(!!errors.startingRate)} pl-9`}
+                  return (
+                    <div className="flex items-center flex-wrap gap-2">
+                      {servicesList.map((service, i) => {
+                        const isSelected = (field.value || []).includes(
+                          service,
+                        );
+                        return (
+                          <button
+                            type="button"
+                            key={i}
+                            onClick={() => handleToggle(service)}
+                            className={`leading-5 border flex items-center rounded-full py-2 px-4 text-sm transition-colors duration-150 cursor-pointer ${
+                              isSelected
+                                ? "bg-primary text-white border-primary shadow-sm"
+                                : "bg-bg border-light-gray text-text-dark hover:border-muted/50"
+                            }`}
+                          >
+                            {service}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  );
+                }}
               />
+              {errors.services && (
+                <span className="text-xs text-soft-danger">
+                  {errors.services.message}
+                </span>
+              )}
             </div>
-            {errors.startingRate && (
-              <span className="text-xs text-soft-danger">
-                {errors.startingRate.message}
-              </span>
-            )}
+
+            <div className="grid gap-2 md:col-span-2">
+              <label className="text-xs font-semibold text-primary uppercase tracking-wide">
+                Work Areas
+              </label>
+              <Controller
+                name="workArea"
+                control={control}
+                render={({ field }) => {
+                  const handleToggle = (district: string) => {
+                    const currentValues = field.value || [];
+                    if (currentValues.includes(district)) {
+                      field.onChange(
+                        currentValues.filter(
+                          (item: string) => item !== district,
+                        ),
+                      );
+                    } else {
+                      field.onChange([...currentValues, district]);
+                    }
+                  };
+
+                  return (
+                    <div className="flex items-center flex-wrap gap-2">
+                      {districts.map((district, i) => {
+                        const isSelected = (field.value || []).includes(
+                          district,
+                        );
+                        return (
+                          <button
+                            type="button"
+                            key={i}
+                            onClick={() => handleToggle(district)}
+                            className={`leading-5 border flex items-center rounded-full py-2 px-4 text-sm transition-colors duration-150 cursor-pointer ${
+                              isSelected
+                                ? "bg-primary text-white border-primary shadow-sm"
+                                : "bg-bg border-light-gray text-text-dark hover:border-muted/50"
+                            }`}
+                          >
+                            {district}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  );
+                }}
+              />
+              {errors.workArea && (
+                <span className="text-xs text-soft-danger">
+                  {errors.workArea.message}
+                </span>
+              )}
+            </div>
+
+            <div className="grid gap-2">
+              <label className="text-xs font-semibold text-primary uppercase tracking-wide">
+                Pricing Basis
+              </label>
+              <select
+                {...register("pricingBasis")}
+                className={inputClass(!!errors.pricingBasis)}
+              >
+                <option value="">Select basis</option>
+                <option value="VISIT">Minimum visit fee</option>
+                <option value="FIXED">Starting service price</option>
+              </select>
+              {errors.pricingBasis && (
+                <span className="text-xs text-soft-danger">
+                  {errors.pricingBasis.message}
+                </span>
+              )}
+            </div>
+
+            <div className="grid gap-2">
+              <label className="text-xs font-semibold text-primary uppercase tracking-wide">
+                Starting Rate (NPR)
+              </label>
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted pointer-events-none">
+                  Rs.
+                </span>
+                <input
+                  {...register("startingRate", { valueAsNumber: true })}
+                  type="number"
+                  placeholder="500"
+                  className={`${inputClass(!!errors.startingRate)} pl-9`}
+                />
+              </div>
+              {errors.startingRate && (
+                <span className="text-xs text-soft-danger">
+                  {errors.startingRate.message}
+                </span>
+              )}
+            </div>
           </div>
         </div>
       </div>
 
+      <hr className="border-light-gray" />
+
       {/* 3. Base of Operations */}
-      <div className="bg-card-bg rounded-2xl border border-light-gray shadow-sm overflow-hidden">
-        <div className="flex items-center gap-3 px-6 py-4 border-b border-light-gray">
-          <div className="w-8 h-8 rounded-lg bg-accent/10 flex items-center justify-center shrink-0">
-            <IoLocationOutline className="text-accent text-base" />
-          </div>
-          <div>
-            <h3 className="text-sm font-bold text-primary">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-12">
+        <div className="md:col-span-1">
+          <div className="flex items-center gap-2 mb-2">
+            <IoLocationOutline className="text-accent text-lg" />
+            <h3 className="text-base font-semibold text-primary">
               Base of Operations
             </h3>
-            <p className="text-xs text-muted">Your primary working area</p>
           </div>
+          <p className="text-sm text-muted">
+            Pin your primary location. This helps us match you with local job
+            leads.
+          </p>
         </div>
-        <div className="px-6 py-5">
+
+        <div className="md:col-span-2 bg-card-bg rounded-2xl border border-light-gray shadow-sm overflow-hidden p-6 sm:p-8">
           <AddressFormStep />
         </div>
       </div>
 
+      <hr className="border-light-gray" />
+
       {/* 4. Plan & Tokens */}
-      <div className="bg-card-bg rounded-2xl border border-light-gray shadow-sm overflow-hidden">
-        <div className="flex items-center gap-3 px-6 py-4 border-b border-light-gray">
-          <div className="w-8 h-8 rounded-lg bg-accent/10 flex items-center justify-center shrink-0">
-            <IoWalletOutline className="text-accent text-base" />
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-12">
+        <div className="md:col-span-1">
+          <div className="flex items-center gap-2 mb-2">
+            <IoWalletOutline className="text-accent text-lg" />
+            <h3 className="text-base font-semibold text-primary">
+              Plan & Tokens
+            </h3>
           </div>
-          <div>
-            <h3 className="text-sm font-bold text-primary">Plan & Tokens</h3>
-            <p className="text-xs text-muted">
-              Your current plan and unlock credits
-            </p>
-          </div>
+          <p className="text-sm text-muted">
+            Manage your subscription tier and track your available lead tokens.
+          </p>
         </div>
 
-        <div className="px-6 py-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
-          {/* Plan info */}
-          <div className="flex flex-col gap-3 flex-1">
-            <div className="flex items-center gap-2">
-              <span className="text-base font-bold text-primary">
-                {mockPlan.name} Plan
-              </span>
-              <span className="text-xs font-bold text-accent bg-accent/10 px-2.5 py-0.5 rounded-full">
-                Active
-              </span>
-            </div>
-
-            {/* Token bar */}
-            <div>
-              <div className="flex justify-between items-center mb-1.5">
-                <span className="text-xs text-muted font-medium">
-                  Tokens remaining
+        <div className="md:col-span-2 bg-card-bg rounded-2xl border border-light-gray shadow-sm overflow-hidden p-6 sm:p-8">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
+            <div className="flex flex-col gap-3 flex-1">
+              <div className="flex items-center gap-3">
+                <span className="text-lg font-bold text-primary">
+                  {activeTier === "FREE" ? "Starter" : activeTier} Plan
                 </span>
-                <span className="text-xs font-bold text-primary">
-                  {mockPlan.tokensRemaining} / {mockPlan.tokensTotal}
+                <span className="text-xs font-bold text-accent bg-accent/10 px-2.5 py-1 rounded-full">
+                  Active
                 </span>
               </div>
-              <div className="w-full bg-light-gray h-2 rounded-full overflow-hidden">
-                <div
-                  className="h-full bg-accent rounded-full transition-all duration-500"
-                  style={{
-                    width: `${(mockPlan.tokensRemaining / mockPlan.tokensTotal) * 100}%`,
-                  }}
-                />
-              </div>
-              <p className="text-xs text-muted mt-1.5">
-                Each token unlocks one job lead.
-              </p>
-            </div>
-          </div>
 
-          {/* Upgrade CTA */}
-          <div className="bg-primary rounded-2xl px-5 py-4 flex flex-col gap-2 min-w-50">
-            <div className="flex items-center gap-1.5">
-              <IoSparklesOutline className="text-white/60 text-sm" />
-              <span className="text-xs font-bold text-white/60 uppercase tracking-widest">
-                Pro Plan
-              </span>
+              <div className="bg-light rounded-xl p-4 border border-light-gray mt-2">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-muted font-medium">
+                    Tokens remaining
+                  </span>
+                  <span className="text-2xl font-black text-primary">
+                    {tokenBalance}
+                  </span>
+                </div>
+                <p className="text-xs text-muted mt-2">
+                  Each token unlocks one customer lead.
+                </p>
+              </div>
             </div>
-            <p className="text-sm font-bold text-white leading-snug">
-              Unlimited leads & 0% commission
-            </p>
-            <button
-              type="button"
-              className="mt-1 w-full py-2 bg-accent text-white text-sm font-semibold rounded-xl hover:bg-accent/90 transition-all"
-            >
-              Upgrade to Pro
-            </button>
+
+            {activeTier === "FREE" && (
+              <div className="bg-primary rounded-2xl p-5 flex flex-col gap-3 min-w-60 shadow-md">
+                <div className="flex items-center gap-2">
+                  <IoSparklesOutline className="text-accent text-sm" />
+                  <span className="text-xs font-bold text-accent uppercase tracking-widest">
+                    Pro Plan
+                  </span>
+                </div>
+                <p className="text-sm font-semibold text-white/90 leading-snug">
+                  Unlock unlimited leads & 0% platform commission.
+                </p>
+                <button
+                  type="button"
+                  className="mt-2 w-full py-2.5 bg-accent text-white text-sm font-semibold rounded-xl hover:bg-accent/90 transition-all shadow-sm"
+                >
+                  Upgrade Now
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </div>
 
-      {/* Save */}
-      <div className="flex justify-end">
-        <button
-          type="submit"
-          disabled={isSubmitting}
-          className="inline-flex items-center gap-2 px-6 py-3 bg-accent text-white rounded-xl text-sm font-semibold hover:bg-accent/90 disabled:opacity-50 transition-all"
-        >
-          <IoSaveOutline className="text-base" />
-          {isSubmitting ? "Saving..." : "Save Profile"}
-        </button>
+      {/* Submit Action */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-12 mt-4">
+        <div className="md:col-span-1 hidden md:block"></div>
+        <div className="md:col-span-2 flex justify-end">
+          <button
+            type="submit"
+            disabled={isPending}
+            className="inline-flex items-center gap-2 px-8 py-3 bg-accent text-white rounded-xl text-sm font-semibold hover:bg-accent/90 focus:ring-4 focus:ring-accent/20 disabled:opacity-50 transition-all shadow-sm"
+          >
+            <IoSaveOutline className="text-lg" />
+            {isPending ? "Saving changes..." : "Save Profile"}
+          </button>
+        </div>
       </div>
     </form>
   );

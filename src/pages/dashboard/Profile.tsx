@@ -4,7 +4,6 @@ import { useAuthStore } from "@/store/authStore";
 import CustomerProfileSettings from "./customer/CustomerProfileSettings";
 import ProviderProfileSettings from "./provider/ProviderProfileSettings";
 import { useUserProfile } from "@/hooks/mutations/useUser";
-import type { ProviderResponseType } from "@/types/user.types";
 
 const Profile = () => {
   const { role } = useAuthStore();
@@ -29,9 +28,7 @@ const Profile = () => {
 
       {userProfile &&
         (role === "PROVIDER" ? (
-          <ProviderProfileSettings
-            initialData={userProfile as ProviderResponseType}
-          />
+          <ProviderProfileSettings />
         ) : (
           <CustomerProfileSettings initialData={userProfile} />
         ))}

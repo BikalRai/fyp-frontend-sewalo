@@ -1,81 +1,36 @@
 import SeButton from "@/components/button/SeButton";
+import { useProviderCredits } from "@/hooks/mutations/useBilling";
 import { useJobLeads } from "@/hooks/mutations/useJob";
+import {
+  useProviderProfile,
+  usePublicProviderProfile,
+} from "@/hooks/mutations/useProvider";
+import { useUserProfile } from "@/hooks/mutations/useUser";
 import { formatTimeAgo } from "@/uitls/job.utils";
-import { Group, Paper, Select, SimpleGrid, Text } from "@mantine/core";
+import { Group, Paper, SimpleGrid, Text } from "@mantine/core";
 import {
   IoLocationOutline,
   IoTimeOutline,
   IoArrowForward,
-  IoCaretDown,
   IoPeopleOutline,
   IoTrendingUpOutline,
   IoLockClosedOutline,
   IoStarOutline,
-  IoFlashOutline,
   IoPersonOutline,
   IoLockOpenOutline,
   IoCheckmarkCircleOutline,
 } from "react-icons/io5";
 import { useNavigate } from "react-router-dom";
 
-const stats = [
-  {
-    label: "Leads this month",
-    value: "12",
-    icon: <IoTrendingUpOutline className="text-accent text-lg" />,
-  },
-  {
-    label: "Unlocks remaining",
-    value: "3",
-    icon: <IoLockClosedOutline className="text-accent text-lg" />,
-  },
-  {
-    label: "Avg. rating",
-    value: "4.8",
-    icon: <IoStarOutline className="text-yellow-400 text-lg" />,
-  },
-  {
-    label: "Response time",
-    value: "23m",
-    icon: <IoFlashOutline className="text-accent text-lg" />,
-  },
-];
-
-const mockLeads = [
-  {
-    id: "lead-1",
-    title: "Leaking kitchen sink — needs urgent fix",
-    description:
-      "The PVC pipe under my kitchen sink has a steady drip. It seems to be coming from the U-bend joint.",
-    category: "Plumbing",
-    distance: "1.2 km away",
-    urgencyText: "ASAP",
-    urgencyLevel: "high",
-    location: "Lalitpur, Kupondole",
-    postedAt: "12 min ago",
-    budget: "Rs 1,500–2,500",
-    currentBids: 2,
-    maxBids: 3,
-  },
-  {
-    id: "lead-2",
-    title: "Complete home rewiring and main panel upgrade",
-    description:
-      "Looking to replace old wiring in a 3-bedroom house and upgrade the main breaker panel to handle more load.",
-    category: "Electrical",
-    distance: "2.8 km away",
-    urgencyText: "This week",
-    urgencyLevel: "medium",
-    location: "Kathmandu, Sanepa",
-    postedAt: "1 hr ago",
-    budget: "Rs 3,000–5,000",
-    currentBids: 0,
-    maxBids: 3,
-  },
-];
-
 const JobLeadsPage = () => {
+  const { data: user } = useUserProfile();
   const { data: leads, isLoading, isError } = useJobLeads();
+  const { data: credits } = useProviderCredits();
+  const isProvider = user?.role === "PROVIDER";
+  const { data: provider } = useProviderProfile(isProvider);
+  const { data: providerPublicData } = usePublicProviderProfile(
+    provider?.id as string,
+  );
   const navigate = useNavigate();
 
   // 1. Handle the loading state FIRST
@@ -87,7 +42,29 @@ const JobLeadsPage = () => {
   if (isError) {
     return <div>Error loading leads.</div>;
   }
-  console.log(leads, "LEADS");
+
+  const jobsBidOn = leads?.filter((l) => l.myBid !== null).length ?? 0;
+
+  const stats = [
+    {
+      label: "Unlocks remaining",
+      value: credits?.balance ?? "—",
+      icon: <IoLockClosedOutline className="text-accent text-lg" />,
+    },
+    {
+      label: "Avg. rating",
+      value:
+        providerPublicData?.avgRating != null
+          ? providerPublicData.avgRating.toFixed(1)
+          : "—",
+      icon: <IoStarOutline className="text-yellow-400 text-lg" />,
+    },
+    {
+      label: "Jobs bid on",
+      value: jobsBidOn,
+      icon: <IoTrendingUpOutline className="text-accent text-lg" />,
+    },
+  ];
 
   const hour = new Date().getHours();
   const greeting =
@@ -101,22 +78,22 @@ const JobLeadsPage = () => {
             Provider workspace
           </div>
           <h1 className="text-3xl font-bold text-primary">
-            {greeting}, Bikal 👋
+            {greeting}, {user?.fullName?.split(" ")[0] ?? "there"} 👋
           </h1>
-          <p className="text-sm text-muted mt-1">
+          {/* <p className="text-sm text-muted mt-1">
             3 new jobs near you today. 2 match your trades.
-          </p>
+          </p> */}
         </div>
       </div>
 
       {/* stats card */}
-      <SimpleGrid cols={{ base: 2, sm: 4 }} spacing="md" className="mb-6">
+      <SimpleGrid cols={{ base: 1, sm: 3 }} spacing="md" className="mb-6">
         {stats.map((stat) => (
           <Paper
             key={stat.label}
             withBorder
             radius="lg"
-            p="md"
+            p="lg"
             className="bg-card-bg border-light-gray"
           >
             <Group justify="space-between" align="flex-start" mb={8}>
@@ -133,7 +110,7 @@ const JobLeadsPage = () => {
       </SimpleGrid>
 
       {/* 3. Plan Banner */}
-      <div className="bg-primary rounded-2xl px-7 py-5 flex items-center justify-between gap-4 mb-8">
+      {/* <div className="bg-primary rounded-2xl px-7 py-5 flex items-center justify-between gap-4 mb-8">
         <div>
           <p className="text-xs font-bold text-white/50 uppercase tracking-widest mb-1">
             Current Plan
@@ -150,10 +127,10 @@ const JobLeadsPage = () => {
           variant="accentLight"
           className="shrink-0 whitespace-nowrap"
         />
-      </div>
+      </div> */}
 
       {/* filters */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+      {/* <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
         <div className="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
           <Select
             data={["All Categories", "Electrical", "Plumbing", "Painting"]}
@@ -195,7 +172,12 @@ const JobLeadsPage = () => {
           />
         </div>
         <span className="text-sm font-medium text-muted whitespace-nowrap">
-          {mockLeads.length} leads available
+          {leads?.length ?? 0} leads available
+        </span>
+      </div> */}
+      <div className="flex justify-end mb-8">
+        <span className="text-sm font-medium text-muted whitespace-nowrap">
+          {leads?.length ?? 0} leads available
         </span>
       </div>
 
@@ -216,13 +198,16 @@ const JobLeadsPage = () => {
           // --- THE NEW STATE LOGIC ---
           const hasBid = Boolean(lead.myBid);
           const isUnlocked = lead.isUnlocked;
+          const isFull = lead.unlockCount >= 3;
 
           // Determine card styling based on state
           const cardBorder = hasBid
             ? "border-green-500 shadow-green-500/10"
             : isUnlocked
               ? "border-accent/50 shadow-accent/5"
-              : "border-light-gray hover:border-accent";
+              : isFull
+                ? "border-red-200 bg-red-50/10 opacity-75" // Visually dim full jobs
+                : "border-light-gray hover:border-accent";
 
           const cardBg = hasBid ? "bg-green-50/30" : "bg-card-bg";
 
@@ -292,17 +277,30 @@ const JobLeadsPage = () => {
                 <div className="shrink-0 w-full sm:w-auto mt-2 sm:mt-0">
                   <SeButton
                     clickFunc={() => navigate(`/dashboard/leads/${lead.id}`)}
-                    // Button text changes based on what the user needs to do next
                     btnText={
                       hasBid
                         ? "View Quote"
                         : isUnlocked
                           ? "Place Bid"
-                          : "View Details"
+                          : isFull
+                            ? "Job Full" // Prevent unlocking
+                            : "View Details" // Which leads to the unlock screen
                     }
-                    variant={hasBid ? "outline" : "accentLight"}
-                    icon={<IoArrowForward className="text-lg" />}
+                    variant={
+                      hasBid
+                        ? "outline"
+                        : isFull && !isUnlocked
+                          ? "lightGray"
+                          : "accentLight"
+                    }
+                    icon={
+                      !(isFull && !isUnlocked) ? (
+                        <IoArrowForward className="text-lg" />
+                      ) : undefined
+                    }
                     iconPosition="right"
+                    // Disable the button entirely if it's full AND they haven't unlocked it yet
+                    disabled={isFull && !isUnlocked}
                   />
                 </div>
               </div>

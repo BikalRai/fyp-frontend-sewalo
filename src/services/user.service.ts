@@ -1,5 +1,6 @@
 import { api } from "@/config/api";
 import type {
+  UpdateCustomerPayload,
   UpdateUserAddressParams,
   UserAddressType,
   UserProfileType,
@@ -19,4 +20,9 @@ export const updateUserAddress = async ({
   const { data } = await api.patch(`/users/update-address/${id}`, updateData);
 
   return data.data;
+};
+
+export const updateCustomerProfile = async (payload: UpdateCustomerPayload) => {
+  const { data } = await api.patch("/users/profile", payload);
+  return data;
 };

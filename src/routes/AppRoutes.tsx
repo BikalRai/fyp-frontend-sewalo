@@ -19,7 +19,6 @@ import {
 } from "react-router-dom";
 import Profile from "@/pages/dashboard/Profile";
 import JobDetailsPage from "@/pages/dashboard/customer/JobDetailsPage";
-import MessagesPage from "@/pages/dashboard/MessagesPage";
 import JobLeadsPage from "@/pages/dashboard/provider/JobLeadsPage";
 import JobLeadDetailsPage from "@/pages/dashboard/provider/JobLeadDetailsPage";
 import MyJobsPage from "@/pages/dashboard/provider/MyJobsPage";
@@ -27,6 +26,8 @@ import BillingPage from "@/pages/dashboard/provider/BillingPage";
 import PaymentVerifyPage from "@/pages/dashboard/PaymentVerifyPage";
 import AdminProvidersPage from "@/pages/admin/AdminProvidersPage";
 import ProviderPublicProfilePage from "@/pages/ProviderPublicProfilePage";
+import ConversationsListPage from "@/pages/ConversationsListPage";
+import ChatRoomPage from "@/pages/ChatRoomPage";
 
 interface RequireAuthProps {
   allowedRoles?: string[];
@@ -138,7 +139,12 @@ const router = createBrowserRouter([
             children: [{ path: "providers", element: <AdminProvidersPage /> }],
           },
           { element: <Profile />, path: "profile" },
-          { element: <MessagesPage />, path: "messages" },
+
+          // --- MESSAGING ROUTES ---
+          // 1. Inbox list — shows all conversations
+          { element: <ConversationsListPage />, path: "messages" },
+          // 2. Individual chat room — one conversation
+          { element: <ChatRoomPage />, path: "jobs/:jobId/chat" },
         ],
       },
     ],
@@ -147,10 +153,6 @@ const router = createBrowserRouter([
     element: <RequireAuth allowedRoles={["CUSTOMER"]} />,
     children: [
       { path: "/customer-onboarding", element: <CustomerOnboarding /> },
-      // {
-      //   path: "/post-job",
-      //   element: <JobPost />,
-      // },
     ],
   },
   {

@@ -59,6 +59,7 @@ export const UserProfileSchema = z.object({
   fullName: z.string(),
   email: z.string().email(),
   phoneNumber: z.string().min(10, "Please enter a valid phone number"),
+  imageUrl: z.string().nullable().optional(),
   role: roleEnumSchema,
   createdAt: z.string().datetime(),
   isActive: z.boolean(),
@@ -114,3 +115,12 @@ export const providerResponseSchema = UserProfileSchema.extend({
 });
 
 export type ProviderResponseType = z.infer<typeof providerResponseSchema>;
+
+export interface UpdateCustomerPayload {
+  fullName: string;
+  phoneNumber: string;
+  latitude: number;
+  longitude: number;
+  address: string;
+  imageUrl?: string;
+}

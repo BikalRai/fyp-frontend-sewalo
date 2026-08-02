@@ -1,19 +1,17 @@
 import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { IoSend, IoChatbubblesOutline } from "react-icons/io5";
+import { IoSend, IoChatbubblesOutline, IoArrowBack } from "react-icons/io5";
 import { useAuthStore } from "@/store/authStore";
 import {
   useChatHistory,
   useChatSubscription,
-  useConversations,
   useSendMessage,
 } from "@/hooks/mutations/useChat";
 
-const MessagesPage = () => {
+const ChatRoomPage = () => {
   const { jobId } = useParams<{ jobId: string }>();
   const navigate = useNavigate();
-
-  const { userId, role } = useAuthStore();
+  const { userId } = useAuthStore();
 
   const [content, setContent] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -22,10 +20,6 @@ const MessagesPage = () => {
   const { mutate: sendMessage, isPending: isSending } = useSendMessage();
 
   useChatSubscription(jobId || null);
-
-  const { data: conversations } = useConversations();
-
-  console.log(conversations, "conversation");
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -38,46 +32,24 @@ const MessagesPage = () => {
     sendMessage(
       { jobId, content: content.trim() },
       {
-        onSuccess: () => {
-          setContent("");
-        },
+        onSuccess: () => setContent(""),
       },
     );
   };
 
-  // --- UI: NO JOB SELECTED ---
-  if (!jobId) {
-    const isCustomer = role === "CUSTOMER";
-    const redirectPath = isCustomer
-      ? "/dashboard/my-posts"
-      : "/dashboard/my-jobs";
-    const buttonText = isCustomer ? "Go to My Posts" : "Go to My Jobs";
+  if (!jobId) return null; // route guard should prevent this, but keep it safe
 
-    return (
-      <div className="h-[calc(100vh-100px)] flex flex-col items-center justify-center bg-white rounded-2xl border border-light-gray shadow-sm p-8 text-center">
-        <div className="w-20 h-20 bg-accent/10 text-accent rounded-full flex items-center justify-center mb-4">
-          <IoChatbubblesOutline className="text-4xl" />
-        </div>
-        <h2 className="text-2xl font-bold text-primary mb-2">Your Messages</h2>
-        <p className="text-muted max-w-md mb-6">
-          To start chatting, go to your {isCustomer ? "Posts" : "Active Jobs"}{" "}
-          and click the "Message" button on a hired professional's card.
-        </p>
-        <button
-          onClick={() => navigate(redirectPath)}
-          className="bg-primary text-white px-6 py-2.5 rounded-xl font-medium hover:bg-text-dark transition-colors"
-        >
-          {buttonText}
-        </button>
-      </div>
-    );
-  }
-
-  // --- UI: CHAT ROOM ---
   return (
     <div className="flex flex-col max-h-200 bg-white rounded-2xl border border-light-gray shadow-sm overflow-hidden">
       {/* Header */}
-      <div className="p-4 border-b border-light-gray flex items-center justify-between bg-white shadow-sm shrink-0">
+      <div className="p-4 border-b border-light-gray flex items-center gap-3 bg-white shadow-sm shrink-0">
+        <button
+          onClick={() => navigate("/dashboard/messages")}
+          className="p-2 -ml-2 rounded-full hover:bg-bg transition-colors text-muted hover:text-primary"
+          aria-label="Back to messages"
+        >
+          <IoArrowBack className="text-xl" />
+        </button>
         <div>
           <h3 className="font-bold text-primary text-lg flex items-center gap-2">
             <IoChatbubblesOutline className="text-accent" />
@@ -89,7 +61,7 @@ const MessagesPage = () => {
         </div>
       </div>
 
-      {/* Message History — the only scrollable region */}
+      {/* Message History */}
       <div className="flex-1 p-6 overflow-y-auto bg-bg/30 space-y-4">
         {isLoading ? (
           <div className="flex justify-center items-center h-full text-muted">
@@ -103,7 +75,6 @@ const MessagesPage = () => {
         ) : (
           messages.map((msg) => {
             const isMe = msg.senderId === userId;
-
             return (
               <div
                 key={msg.id}
@@ -160,4 +131,4 @@ const MessagesPage = () => {
   );
 };
 
-export default MessagesPage;
+export default ChatRoomPage;

@@ -4,7 +4,9 @@ import {
   getProviderProfile,
   getPublicProviderProfile,
   updateProviderPersonalDetails,
+  updateProviderProfile,
 } from "@/services/provider.service";
+import type { ProviderProfileUpdateType } from "@/types/provider.types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
@@ -45,5 +47,21 @@ export const usePublicProviderProfile = (providerId: string) => {
     queryKey: providerKeys.details(providerId),
     queryFn: () => getPublicProviderProfile(providerId),
     enabled: !!providerId,
+  });
+};
+
+export const useUpdateProviderProfile = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (data: ProviderProfileUpdateType) =>
+      updateProviderProfile(data),
+    onSuccess: (updatedProfile) => {
+      queryClient.setQueryData(providerKeys.me(), updatedProfile);
+      toast.success("Profile updated successfully");
+    },
+    onError: () => {
+      toast.error("Failed to update profile. Please try again.");
+    },
   });
 };

@@ -75,3 +75,10 @@ export const billingKeys = {
 export const adminKeys = {
   pendingProviders: () => ["admin", "pending-providers"] as const,
 };
+
+export const chatKeys = {
+  all: ["chat"] as const,
+  jobChat: (jobId: string) => [...chatKeys.all, "job", jobId] as const,
+  // Add this if we do the sidebar later
+  conversations: () => [...chatKeys.all, "conversations"] as const,
+};

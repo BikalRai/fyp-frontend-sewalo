@@ -87,6 +87,8 @@ export interface JobResponse {
   isUnlocked: boolean;
   myBid: BidResponse | null;
   rating: IRating | null;
+  unlockCount: number;
+  aiAnalysis: AiAnalysisResponse | null;
 }
 
 export interface CompleteJobPayload {
@@ -111,4 +113,11 @@ export interface IRating {
   score: number;
   review: string | null;
   createdAt: string;
+}
+
+export interface AiAnalysisResponse {
+  difficulty: "LOW" | "MEDIUM" | "HIGH" | string;
+  reasoning: string;
+  estimatedHours: number;
+  recommendedTools: string[];
 }

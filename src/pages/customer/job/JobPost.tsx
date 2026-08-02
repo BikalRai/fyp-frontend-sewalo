@@ -60,13 +60,22 @@ const PostJob = () => {
     location: userLocation,
     phoneNumber,
     setLocation,
+    setPhoneNumber, // 1. Extract this
   } = useLocationStore();
 
   useEffect(() => {
-    if (user && !userLocation.address) {
-      setLocation(user.lat, user.lng, user.address);
+    if (user) {
+      // 2. Sync Location (only if store is empty so we don't overwrite active typing)
+      if (!userLocation.address && user.lat && user.lng) {
+        setLocation(user.lat, user.lng, user.address);
+      }
+
+      // 3. Sync Phone Number (only if store is empty and user actually has one)
+      if (!phoneNumber && user.phoneNumber) {
+        setPhoneNumber(user.phoneNumber);
+      }
     }
-  }, [user, userLocation.address, setLocation]);
+  }, [user, userLocation.address, phoneNumber, setLocation, setPhoneNumber]);
 
   const nextStep = (): void =>
     setActive((prev) => (prev < TOTAL_STEPS - 1 ? prev + 1 : prev));
