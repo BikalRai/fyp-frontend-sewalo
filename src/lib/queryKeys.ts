@@ -73,7 +73,13 @@ export const billingKeys = {
 };
 
 export const adminKeys = {
-  pendingProviders: () => ["admin", "pending-providers"] as const,
+  all: ["admin"] as const,
+  pendingProviders: () => [...adminKeys.all, "pending-providers"] as const,
+  liquidityStats: () => [...adminKeys.all, "liquidity-stats"] as const,
+  jobs: () => [...adminKeys.all, "jobs"] as const,
+  providers: () => [...adminKeys.all, "providers"] as const,
+  transactions: () => [...adminKeys.all, "transactions"] as const,
+  revenueSummary: () => [...adminKeys.all, "revenue-summary"] as const,
 };
 
 export const chatKeys = {

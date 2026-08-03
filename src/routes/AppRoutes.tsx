@@ -28,6 +28,9 @@ import AdminProvidersPage from "@/pages/admin/AdminProvidersPage";
 import ProviderPublicProfilePage from "@/pages/ProviderPublicProfilePage";
 import ConversationsListPage from "@/pages/ConversationsListPage";
 import ChatRoomPage from "@/pages/ChatRoomPage";
+import AdminJobsPage from "@/pages/admin/AdminJobsPage";
+import AdminAllProvidersPage from "@/pages/admin/AdminAllProvidersPage ";
+import AdminTransactionsPage from "@/pages/admin/AdminTransactionsPage ";
 
 interface RequireAuthProps {
   allowedRoles?: string[];
@@ -120,7 +123,7 @@ const router = createBrowserRouter([
               { path: "my-posts", element: <MyPosts /> },
               { path: "my-posts/:jobId", element: <JobDetailsPage /> },
               {
-                path: "providers/:providerId",
+                path: "profile/:providerId",
                 element: <ProviderPublicProfilePage />,
               },
             ],
@@ -136,7 +139,12 @@ const router = createBrowserRouter([
           },
           {
             element: <RequireAuth allowedRoles={["ADMIN"]} />,
-            children: [{ path: "providers", element: <AdminProvidersPage /> }],
+            children: [
+              { path: "providers", element: <AdminProvidersPage /> },
+              { path: "jobs", element: <AdminJobsPage /> },
+              { path: "all-providers", element: <AdminAllProvidersPage /> },
+              { path: "transactions", element: <AdminTransactionsPage /> },
+            ],
           },
           { element: <Profile />, path: "profile" },
 

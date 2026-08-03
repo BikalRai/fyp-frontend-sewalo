@@ -17,6 +17,8 @@ export const useAcceptBid = (jobId: string) => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: bidKeys.jobBids(jobId) });
       queryClient.invalidateQueries({ queryKey: jobKeys.detail(jobId) });
+      queryClient.invalidateQueries({ queryKey: jobKeys.providerFeed() });
+      queryClient.invalidateQueries({ queryKey: jobKeys.customerHistory() });
     },
   });
 };

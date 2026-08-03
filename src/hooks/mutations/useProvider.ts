@@ -1,4 +1,4 @@
-import { jobKeys, providerKeys } from "@/lib/queryKeys";
+import { jobKeys, providerKeys, userKeys } from "@/lib/queryKeys";
 import { getProviderStats } from "@/services/job.service";
 import {
   getProviderProfile,
@@ -26,6 +26,7 @@ export const useUpdateProviderPersonal = () => {
   return useMutation({
     mutationFn: updateProviderPersonalDetails,
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: userKeys.me() });
       queryClient.invalidateQueries({ queryKey: providerKeys.me() });
     },
     onError: (err) => {
@@ -58,6 +59,8 @@ export const useUpdateProviderProfile = () => {
       updateProviderProfile(data),
     onSuccess: (updatedProfile) => {
       queryClient.setQueryData(providerKeys.me(), updatedProfile);
+      queryClient.invalidateQueries({ queryKey: userKeys.me() });
+      queryClient.invalidateQueries({ queryKey: providerKeys.me() });
       toast.success("Profile updated successfully");
     },
     onError: () => {

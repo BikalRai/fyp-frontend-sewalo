@@ -3,6 +3,11 @@ import {
   getPendingProviders,
   verifyProvider,
   rejectProvider,
+  getLiquidityStats,
+  getAllAdminJobs,
+  getAllAdminProviders,
+  getAllTransactions,
+  getRevenueSummary,
 } from "@/services/admin.service";
 import { toast } from "sonner";
 import axios from "axios";
@@ -21,9 +26,8 @@ export const useVerifyProvider = () => {
   return useMutation({
     mutationFn: (providerId: string) => verifyProvider(providerId),
     onSuccess: () => {
-      // Refresh the list immediately so the approved provider disappears
       queryClient.invalidateQueries({ queryKey: adminKeys.pendingProviders() });
-      // Note: Removed toast.success here because toast.promise handles it in the component!
+      queryClient.invalidateQueries({ queryKey: adminKeys.providers() });
     },
     onError: (error) => {
       if (axios.isAxiosError(error)) {
@@ -47,6 +51,7 @@ export const useRejectProvider = () => {
     onSuccess: () => {
       // Instantly clear the rejected provider from the UI list
       queryClient.invalidateQueries({ queryKey: adminKeys.pendingProviders() });
+      queryClient.invalidateQueries({ queryKey: adminKeys.providers() });
     },
     onError: (error) => {
       if (axios.isAxiosError(error)) {
@@ -59,3 +64,38 @@ export const useRejectProvider = () => {
     },
   });
 };
+
+export const useLiquidityStats = () => {
+  return useQuery({
+    queryKey: adminKeys.liquidityStats(),
+    queryFn: getLiquidityStats,
+    refetchInterval: 60000, // Background poll every 60s for the live dashboard feel
+    staleTime: 30000, // Prevent unnecessary refetches if navigating away and back quickly
+  });
+};
+
+export const useAllJobsAdmin = () => {
+  return useQuery({
+    queryKey: adminKeys.jobs(),
+    queryFn: getAllAdminJobs,
+  });
+};
+
+export const useAllProvidersAdmin = () => {
+  return useQuery({
+    queryKey: adminKeys.providers(),
+    queryFn: getAllAdminProviders,
+  });
+};
+
+export const useAllTransactions = () =>
+  useQuery({
+    queryKey: adminKeys.transactions(),
+    queryFn: getAllTransactions,
+  });
+
+export const useRevenueSummary = () =>
+  useQuery({
+    queryKey: adminKeys.revenueSummary(),
+    queryFn: getRevenueSummary,
+  });

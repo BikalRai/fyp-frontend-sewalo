@@ -47,7 +47,7 @@ export const useUpdateCustomerProfile = () => {
       toast.success("Profile updated successfully");
 
       // Force the profile data to instantly refresh across the app
-      queryClient.invalidateQueries({ queryKey: ["userProfile"] });
+      queryClient.invalidateQueries({ queryKey: userKeys.me() });
     },
     onError: (error) => {
       // Safely extract the error message from the backend response if it exists
