@@ -3,6 +3,10 @@ import { z } from "zod";
 export const customerProfileSchema = z.object({
   fullName: z.string().min(2, "Full name must be at least 2 characters"),
   phoneNumber: z.string().min(10, "Please enter a valid phone number"),
+  imageUrl: z
+    .union([z.instanceof(File), z.string()])
+    .nullable()
+    .optional(),
 });
 
 export type CustomerProfileType = z.infer<typeof customerProfileSchema>;
@@ -16,6 +20,10 @@ export const providerProfileSchema = z.object({
   services: z.string().min(3, "Please list at least one service"),
   pricingBasis: z.enum(["VISIT", "FIXED"]).nullish(),
   startingRate: z.string().min(1, "Rate is required").nullish(),
+  imageUrl: z
+    .union([z.instanceof(File), z.string()])
+    .nullable()
+    .optional(),
 });
 
 export type ProviderProfileFormType = z.infer<typeof providerProfileSchema>;

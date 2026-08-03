@@ -31,4 +31,5 @@ export interface BidResponse {
   contactUnlocked: boolean;
   providerPhone: string | null;
   createdAt: string;
+  subscriptionTier?: string;
 }

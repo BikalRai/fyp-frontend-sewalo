@@ -1,4 +1,7 @@
-import { usePendingProviders } from "@/hooks/mutations/useAdmin";
+import {
+  useLiquidityStats,
+  usePendingProviders,
+} from "@/hooks/mutations/useAdmin";
 import {
   LuShieldCheck,
   LuBriefcase,
@@ -8,11 +11,15 @@ import {
 import SeSpinner from "@/components/spinner/SeSpinner";
 import { useNavigate } from "react-router-dom";
 import { useGetAllJobs } from "@/hooks/mutations/useJob";
+import { MarketplaceLiquidityChart } from "@/features/charts/MarketplaceLiquidityChart";
 
 const AdminDashboardHome = () => {
   const navigate = useNavigate();
   const { data: pendingProviders, isLoading } = usePendingProviders();
   const { data: jobs } = useGetAllJobs();
+  const { data: liquidityStats, isLoading: statsLoading } = useLiquidityStats();
+
+  console.log(liquidityStats, " STATs");
 
   if (isLoading) {
     return (
@@ -82,7 +89,7 @@ const AdminDashboardHome = () => {
           </div>
         </div>
 
-        {/* Card 3: Marketplace Volume (Placeholder for scaling) */}
+        {/* Card 3: Marketplace Volume */}
         <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm">
           <div className="flex items-center justify-between mb-4">
             <span className="text-xs font-bold uppercase tracking-wider text-gray-400">
@@ -119,6 +126,14 @@ const AdminDashboardHome = () => {
             </span>
           </div>
         </div>
+      </div>
+
+      {/* 3. The Analytical Context (The New Chart) */}
+      <div className="w-full">
+        <MarketplaceLiquidityChart
+          data={liquidityStats}
+          isLoading={statsLoading}
+        />
       </div>
 
       {/* Quick Action Banner */}

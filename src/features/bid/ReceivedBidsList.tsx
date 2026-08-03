@@ -80,11 +80,25 @@ const ReceivedBidsList = ({ jobId }: ReceivedBidsListProps) => {
             <div>
               <div className="flex items-center gap-2">
                 <Link
-                  to={`/dashboard/providers/${bid.providerId}`}
+                  to={`/dashboard/profile/${bid.providerId}`}
                   className="font-bold text-primary text-base hover:underline"
                 >
                   {bid.providerName}
                 </Link>
+
+                {/* --- NEW: Subscription Tier Badges --- */}
+                {bid.subscriptionTier === "PRO" && (
+                  <span className="bg-blue-50 text-blue-600 border border-blue-200 text-small font-bold uppercase tracking-wider py-0.5 px-2 rounded-full">
+                    Pro
+                  </span>
+                )}
+                {bid.subscriptionTier === "BUSINESS" && (
+                  <span className="bg-purple-50 text-purple-600 border border-purple-200 text-small font-bold uppercase tracking-wider py-0.5 px-2 rounded-full">
+                    Business
+                  </span>
+                )}
+                {/* ------------------------------------- */}
+
                 {isHired && (
                   <span className="bg-green-100 text-green-700 text-small font-bold uppercase tracking-wider py-1 px-2 rounded flex items-center gap-1">
                     <IoRibbonOutline /> Hired

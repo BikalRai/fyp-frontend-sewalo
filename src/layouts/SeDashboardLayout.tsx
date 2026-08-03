@@ -64,6 +64,8 @@ const SeDashboardLayout = ({ children }: IContainerProp) => {
       </div>
     );
 
+  console.log(user, "USER IN LAYOUT");
+
   return (
     <div className="h-dvh w-full flex overflow-hidden">
       <aside className="bg-primary h-full overflow-y-auto w-16 lg:w-60 shrink-0 transition-all duration-300">
@@ -164,14 +166,32 @@ const SeDashboardLayout = ({ children }: IContainerProp) => {
               </Popover.Dropdown>
             </Popover>
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-full flex items-center justify-center bg-accent/10 hover:bg-accent/20 transition-colors duration-200 cursor-pointer">
-                {user ? (
-                  <span className="text-accent text-sm font-medium">A</span>
-                ) : (
-                  <img src="" alt="User avatar" />
-                )}
-              </div>
-              <div>{user.fullName}</div>
+              {user.role === "ADMIN" ? (
+                /* --- ADMIN VIEW: No avatar, just a system role badge --- */
+                <div className="bg-primary/10 text-primary border border-primary/20 px-3 py-1.5 rounded-md text-xs font-bold tracking-wider uppercase cursor-default">
+                  Admin
+                </div>
+              ) : (
+                /* --- CUSTOMER/PROVIDER VIEW: Standard avatar and name --- */
+                <>
+                  <div className="w-8 h-8 rounded-full flex items-center justify-center bg-accent/10 hover:bg-accent/20 transition-colors duration-200 cursor-pointer overflow-hidden">
+                    {user.imageUrl ? (
+                      <img
+                        src={user.imageUrl}
+                        alt={`${user.fullName}'s avatar`}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <span className="text-accent text-sm font-bold">
+                        {user.fullName.charAt(0).toUpperCase()}
+                      </span>
+                    )}
+                  </div>
+                  <div className="text-sm font-medium text-gray-800">
+                    {user.fullName}
+                  </div>
+                </>
+              )}
             </div>
           </div>
         </div>

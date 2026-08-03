@@ -88,6 +88,24 @@ const navlinks: INavItem[] = [
     icon: LuUsers,
     roles: ["ADMIN"],
   },
+  {
+    label: "Jobs",
+    path: "jobs",
+    icon: LuBriefcase,
+    roles: ["ADMIN"],
+  },
+  {
+    label: "All Providers",
+    path: "all-providers",
+    icon: LuUsers,
+    roles: ["ADMIN"],
+  },
+  {
+    label: "Transactions",
+    path: "transactions",
+    icon: LuWallet,
+    roles: ["ADMIN"],
+  },
 ];
 
 const SeDashboardNavbar = ({ role }: INavBarProp) => {
@@ -117,7 +135,7 @@ const SeDashboardNavbar = ({ role }: INavBarProp) => {
           const isActive =
             link.path === "/dashboard"
               ? currentPath === "/dashboard"
-              : currentPath.includes(link.path);
+              : currentPath.split("/").includes(link.path);
 
           // <-- NEW: Check if this specific link is the Messages link
           const isMessages = link.label === "Messages";

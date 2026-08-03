@@ -112,6 +112,7 @@ export interface IPublicProviderProfile {
   avgRating: number | null;
   ratingCount: number;
   recentReviews: IRating[];
+  activeTier?: "FREE" | "PRO" | "BUSINESS" | string;
 }
 
 export const providerProfileUpdateSchema = z.object({
@@ -143,6 +144,10 @@ export const providerProfileFormSchema = z.object({
 
   pricingBasis: z.string().min(1, "Pricing basis is required"),
   startingRate: z.number().min(0, "Starting rate cannot be negative"),
+  imageUrl: z
+    .union([z.instanceof(File), z.string()])
+    .nullable()
+    .optional(),
 });
 
 export type ProviderProfileFormType = z.infer<typeof providerProfileFormSchema>;
