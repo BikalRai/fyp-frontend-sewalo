@@ -32,7 +32,7 @@ const AdminDashboardHome = () => {
   const pendingCount = pendingProviders?.length || 0;
 
   return (
-    <div className="p-8 max-w-7xl mx-auto space-y-8">
+    <div className="space-y-8">
       {/* Header */}
       <div>
         <h1 className="text-2xl font-bold text-gray-900">

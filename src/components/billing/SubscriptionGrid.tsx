@@ -22,92 +22,97 @@ const SubscriptionGrid = ({
   onUpgrade,
 }: SubscriptionGridProps) => {
   return (
-    <div className="mt-12">
-      <div className="mb-6">
-        <h2 className="text-xl font-bold text-gray-900">Upgrade Your Plan</h2>
-        <p className="text-sm text-gray-500 mt-1">
-          Get monthly leads included and unlock discounted top-up rates.
-        </p>
-      </div>
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-5 items-start">
+      {plans.map((plan) => {
+        const currentRank = TIER_RANK[activeTier];
+        const planRank = TIER_RANK[plan.tier];
+        const isCurrentPlan = planRank === currentRank;
+        const isLowerTier = planRank < currentRank;
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {plans.map((plan) => {
-          const currentRank = TIER_RANK[activeTier];
-          const planRank = TIER_RANK[plan.tier];
-          const isCurrentPlan = planRank === currentRank;
-          const isLowerTier = planRank < currentRank;
+        return (
+          <div
+            key={plan.id}
+            className={`bg-card-bg rounded-2xl p-6 flex flex-col transition-all duration-300 ${
+              plan.isPopular
+                ? "border-2 border-primary shadow-[0_4px_20px_rgba(25,53,87,0.12)] relative overflow-hidden hover:shadow-[0_8px_32px_rgba(25,53,87,0.18)] md:-mt-2"
+                : "border border-light-gray shadow-[0_2px_12px_rgba(25,53,87,0.04)] hover:shadow-[0_8px_24px_rgba(25,53,87,0.08)]"
+            }`}
+          >
+            {plan.isPopular && (
+              <div className="absolute top-0 right-0 bg-primary text-white text-small font-bold px-3.5 py-1.5 rounded-bl-xl tracking-wider uppercase">
+                Most Popular
+              </div>
+            )}
 
-          return (
-            <div
-              key={plan.id}
-              className={`relative rounded-xl bg-white p-6 border transition-all flex flex-col justify-between ${
-                plan.isPopular
-                  ? "border-primary shadow-md ring-1 ring-primary"
-                  : "border-gray-200"
-              }`}
-            >
-              {plan.isPopular && (
-                <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary text-white text-small font-bold uppercase tracking-widest px-3 py-1 rounded-full">
-                  Most Popular
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-bold text-text-dark">{plan.name}</h3>
+              {isCurrentPlan && (
+                <span className="text-small font-bold text-muted bg-card-label px-2.5 py-1 rounded-lg uppercase tracking-wider">
+                  Current
                 </span>
               )}
-
-              <div>
-                <h3 className="text-lg font-bold text-gray-900">{plan.name}</h3>
-                <div className="mt-4 flex items-baseline">
-                  <span className="text-3xl font-extrabold text-gray-900">
-                    Rs {plan.monthlyPriceRs}
-                  </span>
-                  <span className="text-gray-500 text-sm ml-1">/month</span>
-                </div>
-
-                <ul className="mt-6 space-y-3">
-                  {plan.features.map((feature, i) => (
-                    <li
-                      key={i}
-                      className="flex items-start gap-2 text-sm text-gray-600"
-                    >
-                      <LuCheck
-                        size={16}
-                        className="text-emerald-500 shrink-0 mt-0.5"
-                      />
-                      <span>{feature}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              <div className="mt-8">
-                {isLowerTier ? (
-                  <p className="text-center text-xs text-gray-400 py-2.5">
-                    Included in your current plan
-                  </p>
-                ) : (
-                  <button
-                    disabled={isCurrentPlan}
-                    onClick={() => onUpgrade(plan)}
-                    className={`w-full py-2.5 rounded-lg text-sm font-semibold transition-colors flex items-center justify-center gap-2 ${
-                      isCurrentPlan
-                        ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                        : plan.isPopular
-                          ? "bg-primary text-white hover:bg-primary/90 cursor-pointer"
-                          : "bg-gray-900 text-white hover:bg-gray-800 cursor-pointer"
-                    }`}
-                  >
-                    {isCurrentPlan ? (
-                      "Current Plan"
-                    ) : (
-                      <>
-                        <LuZap size={16} /> Upgrade to {plan.name}
-                      </>
-                    )}
-                  </button>
-                )}
-              </div>
             </div>
-          );
-        })}
-      </div>
+
+            <div className="mb-5">
+              <span
+                className={`text-3xl font-bold ${
+                  plan.isPopular ? "text-primary" : "text-text-dark"
+                }`}
+              >
+                Rs {plan.monthlyPriceRs.toLocaleString()}
+              </span>
+              <span className="text-xs text-muted ml-1">/month</span>
+            </div>
+
+            <ul className="space-y-3 mb-6 flex-1">
+              {plan.features.map((feature, i) => (
+                <li
+                  key={i}
+                  className={`flex items-start gap-2.5 text-xs ${
+                    isCurrentPlan ? "text-muted" : "text-text-dark font-medium"
+                  }`}
+                >
+                  <LuCheck
+                    size={14}
+                    strokeWidth={2.5}
+                    className="text-accent shrink-0 mt-0.5"
+                  />
+                  <span>{feature}</span>
+                </li>
+              ))}
+            </ul>
+
+            <div className="mt-auto">
+              {isLowerTier ? (
+                <p className="text-center text-xs text-muted py-2.5">
+                  Included in your current plan
+                </p>
+              ) : (
+                <button
+                  disabled={isCurrentPlan}
+                  onClick={() => onUpgrade(plan)}
+                  className={`w-full py-2.5 rounded-xl text-xs font-bold transition-all duration-200 flex items-center justify-center gap-2 ${
+                    isCurrentPlan
+                      ? "border-2 border-light-gray text-muted cursor-default"
+                      : plan.isPopular
+                        ? "bg-primary hover:bg-[#122742] text-white shadow-[0_4px_12px_rgba(25,53,87,0.3)] hover:shadow-[0_6px_16px_rgba(25,53,87,0.4)] hover:-translate-y-0.5 active:translate-y-0"
+                        : "border-2 border-primary text-primary hover:bg-primary hover:text-white"
+                  }`}
+                >
+                  {isCurrentPlan ? (
+                    "Active Plan"
+                  ) : (
+                    <>
+                      <LuZap size={14} strokeWidth={2.5} />
+                      Upgrade to {plan.name}
+                    </>
+                  )}
+                </button>
+              )}
+            </div>
+          </div>
+        );
+      })}
     </div>
   );
 };

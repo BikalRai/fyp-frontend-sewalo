@@ -15,11 +15,12 @@ import {
   IoCheckmarkCircleOutline,
   IoPersonCircleOutline,
   IoCallOutline,
+  IoEyeOutline,
+  IoEyeOffOutline,
 } from "react-icons/io5";
 import { useNavigate, useParams } from "react-router-dom";
 import { placeBidSchema, type PlaceBidRequestDto } from "@/types/bid.types";
 
-// Native JS relative time formatter
 const timeAgo = (dateString: string) => {
   const date = new Date(dateString);
   const now = new Date();
@@ -39,14 +40,10 @@ const JobLeadDetailsPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
 
-  // 1. Server State
   const { data: job, isLoading, isError } = useJobLead(String(id));
   const { mutate: unlockJob, isPending: isUnlocking } = useUnlockJob();
   const { mutate: submitBid, isPending: isSubmitting } = usePlaceBid();
 
-  console.log(job);
-
-  // 2. React Hook Form Setup (Replaces quote & message useState)
   const {
     register,
     handleSubmit,
@@ -55,27 +52,47 @@ const JobLeadDetailsPage = () => {
     formState: { errors, isValid },
   } = useForm<PlaceBidRequestDto>({
     resolver: zodResolver(placeBidSchema),
-    mode: "onChange", // Validates as they type
+    mode: "onChange",
   });
 
-  // Watch the message field so we can show the character countdown dynamically
   const messageValue = watch("message", "");
 
-  // 3. UI State
   const [isBidding, setIsBidding] = useState(false);
   const [localHasSubmitted, setLocalHasSubmitted] = useState(false);
 
   if (isLoading)
-    return <div className="pt-8 text-center">Loading job details...</div>;
-  if (isError || !job)
     return (
-      <div className="pt-8 text-center text-red-500">Failed to load job.</div>
+      <div className="flex flex-col items-center justify-center py-20 gap-4">
+        <div className="w-10 h-10 border-3 border-light-gray border-t-accent rounded-full animate-spin" />
+        <p className="text-sm text-muted font-medium">Loading job details...</p>
+      </div>
     );
 
-  // 4. Derived State (Directly from backend)
+  if (isError || !job)
+    return (
+      <div className="flex flex-col items-center justify-center py-20 gap-4">
+        <div className="w-14 h-14 rounded-full bg-soft-danger/10 flex items-center justify-center">
+          <IoLocationOutline className="text-soft-danger" size={24} />
+        </div>
+        <div className="text-center">
+          <p className="text-base font-semibold text-text-dark">
+            Failed to load job
+          </p>
+          <p className="text-sm text-muted mt-1">
+            Something went wrong. Please try again.
+          </p>
+        </div>
+        <SeButton
+          btnText="Retry"
+          variant="outline"
+          clickFunc={() => window.location.reload()}
+          size="sm"
+        />
+      </div>
+    );
+
   const isUnlocked = job.isUnlocked;
   const hasSubmitted = Boolean(job.myBid) || localHasSubmitted;
-
   const postedAt = timeAgo(job.createdAt);
 
   const handleUnlock = () => {
@@ -84,98 +101,140 @@ const JobLeadDetailsPage = () => {
     });
   };
 
-  // 5. RHF Submit Handler
   const onSubmit = (data: PlaceBidRequestDto) => {
     submitBid(
       {
         jobId: String(id),
-        payload: data, // Already validated and formatted by Zod
+        payload: data,
       },
       {
         onSuccess: () => {
           setLocalHasSubmitted(true);
           setIsBidding(false);
-          reset(); // Clear the form memory on success
+          reset();
         },
       },
     );
   };
 
+  // Mask the address - show first part, mask the rest
+  const getMaskedAddress = (fullAddress: string) => {
+    const parts = fullAddress.split(",");
+    if (parts.length <= 2) return fullAddress;
+    return `${parts[0]}, ${parts[1]}...`;
+  };
+
   return (
-    <div className="max-w-5xl mx-auto pt-8 pb-12 px-4">
+    <div className="pt-6 pb-12 px-4 sm:px-6">
+      {/* Back Button */}
       <button
-        className="flex items-center gap-2 text-muted hover:text-primary transition-colors text-sm font-medium mb-8 group cursor-pointer"
+        className="flex items-center gap-2 text-muted hover:text-primary transition-colors text-sm font-medium mb-6 group cursor-pointer"
         onClick={() => navigate(-1)}
       >
         <IoArrowBack
-          size={20}
+          size={18}
           className="group-hover:-translate-x-1 transition-transform shrink-0"
         />
         <span>Back to Lead Feed</span>
       </button>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
         {/* Left Column */}
         <div className="lg:col-span-2 space-y-6">
-          <div className="bg-card-bg border border-light-gray rounded-2xl p-8 shadow-sm">
-            <div className="flex items-center gap-4 mb-4">
-              <span className="text-xs font-bold tracking-wider uppercase text-primary bg-card-label px-3 py-1 rounded-full">
+          <div className="bg-card-bg border border-light-gray/80 rounded-2xl p-6 sm:p-8 shadow-[0_2px_16px_rgba(25,53,87,0.04)]">
+            {/* Category + Time */}
+            <div className="flex flex-wrap items-center gap-3 mb-4">
+              <span className="text-xs font-bold tracking-wider uppercase text-primary bg-card-label px-3 py-1.5 rounded-full">
                 {job.categoryName}
               </span>
-              <span className="text-sm text-muted font-medium">
+              <span className="text-xs text-muted font-medium flex items-center gap-1">
+                <IoTimeOutline size={12} />
                 Posted {postedAt}
               </span>
             </div>
 
-            <h1 className="text-3xl font-bold text-primary mb-8 leading-tight">
+            {/* Title */}
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-text-dark mb-6 leading-tight">
               {job.categoryName} Request
             </h1>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 py-6 border-y border-light-gray mb-8">
-              <div className="flex flex-col gap-1">
-                <span className="text-xs font-bold text-muted uppercase tracking-wider">
+            {/* Location + Timeline Row */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 py-5 border-y border-light-gray/60 mb-6">
+              {/* Location */}
+              <div className="flex flex-col gap-2">
+                <span className="text-[10px] font-bold text-muted uppercase tracking-widest">
                   Location
                 </span>
-                <div className="flex items-center gap-2 text-text-dark font-medium">
-                  <IoLocationOutline className="text-primary text-lg shrink-0" />
-                  <span className="line-clamp-1" title={job.address}>
-                    {job.address}
-                  </span>
+                <div className="flex items-start gap-2">
+                  <IoLocationOutline className="text-accent text-lg shrink-0 mt-0.5" />
+                  <div className="min-w-0">
+                    {isUnlocked ? (
+                      <>
+                        <p className="text-sm font-semibold text-text-dark break-words">
+                          {job.address}
+                        </p>
+                        <p className="text-xs text-accent font-medium mt-1 flex items-center gap-1">
+                          <IoEyeOutline size={12} />
+                          Full address visible
+                        </p>
+                      </>
+                    ) : (
+                      <>
+                        <p className="text-sm font-semibold text-text-dark">
+                          {getMaskedAddress(job.address)}
+                        </p>
+                        <p className="text-xs text-muted font-medium mt-1 flex items-center gap-1">
+                          <IoEyeOffOutline size={12} />
+                          Exact location hidden — unlock to view
+                        </p>
+                      </>
+                    )}
+                  </div>
                 </div>
               </div>
-              <div className="flex flex-col gap-1">
-                <span className="text-xs font-bold text-muted uppercase tracking-wider">
+
+              {/* Timeline */}
+              <div className="flex flex-col gap-2">
+                <span className="text-[10px] font-bold text-muted uppercase tracking-widest">
                   Timeline
                 </span>
-                <div className="flex items-center gap-2 text-text-dark font-medium">
-                  <IoTimeOutline className="text-primary text-lg shrink-0" />
-                  {job.urgency.replace("_", " ")}
+                <div className="flex items-center gap-2">
+                  <IoTimeOutline className="text-accent text-lg shrink-0" />
+                  <span className="text-sm font-semibold text-text-dark">
+                    {job.urgency.replace("_", " ")}
+                  </span>
                 </div>
               </div>
             </div>
 
+            {/* Description */}
             <div>
-              <h3 className="text-lg font-bold text-primary mb-3">
+              <h3 className="text-base font-bold text-text-dark mb-3">
                 Job Description
               </h3>
-              <p className="text-text-dark leading-relaxed whitespace-pre-wrap">
+              <p className="text-sm text-text-dark leading-relaxed whitespace-pre-wrap">
                 {job.description}
               </p>
             </div>
 
+            {/* Images */}
             {job.images && job.images.length > 0 && (
               <div className="mt-6">
-                <h3 className="text-lg font-bold text-primary mb-3">
+                <h3 className="text-base font-bold text-text-dark mb-3">
                   Attached Images
                 </h3>
-                <div className="flex gap-4 overflow-x-auto pb-2">
+                <div className="flex gap-3 overflow-x-auto pb-2 -mx-2 px-2 scrollbar-hide">
                   {job.images.map((imgUrl, idx) => (
-                    <img
+                    <div
                       key={idx}
-                      src={imgUrl}
-                      alt="Job reference"
-                      className="w-32 h-32 object-cover rounded-lg border border-light-gray"
-                    />
+                      className="shrink-0 w-28 h-28 sm:w-32 sm:h-32 rounded-xl overflow-hidden border border-light-gray hover:border-accent transition-colors cursor-pointer group"
+                    >
+                      <img
+                        src={imgUrl}
+                        alt="Job reference"
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      />
+                    </div>
                   ))}
                 </div>
               </div>
@@ -185,19 +244,30 @@ const JobLeadDetailsPage = () => {
 
         {/* Right Column: Sidebar */}
         <div className="lg:col-span-1">
-          <div className="bg-card-bg border border-light-gray rounded-2xl p-6 shadow-sm sticky top-24">
-            <div className="mb-6">
-              <div className="flex justify-between items-end mb-2">
-                <h3 className="text-lg font-bold text-primary">Bid Status</h3>
-                <span className="text-sm font-bold text-soft-danger">
-                  {job.bidCount} Bids
-                </span>
-              </div>
+          <div className="bg-card-bg border border-light-gray/80 rounded-2xl p-6 shadow-[0_2px_16px_rgba(25,53,87,0.04)] lg:sticky lg:top-24">
+            {/* Header */}
+            <div className="flex justify-between items-center mb-6 pb-4 border-b border-light-gray/60">
+              <h3 className="text-base font-bold text-text-dark">Bid Status</h3>
+              <span className="text-xs font-bold text-soft-danger bg-soft-danger/10 px-2.5 py-1 rounded-full">
+                {job.bidCount} Bids
+              </span>
             </div>
 
             {/* STATE 1: Locked */}
             {!isUnlocked && (
-              <>
+              <div className="space-y-4">
+                <div className="bg-light rounded-xl p-4 border border-light-gray/60">
+                  <div className="flex items-center gap-2 mb-2">
+                    <IoEyeOffOutline className="text-muted" size={18} />
+                    <span className="text-sm font-semibold text-text-dark">
+                      Location Hidden
+                    </span>
+                  </div>
+                  <p className="text-xs text-muted leading-relaxed">
+                    {getMaskedAddress(job.address)}
+                  </p>
+                </div>
+
                 <SeButton
                   btnText={
                     isUnlocking ? "Unlocking..." : "Unlock Lead (1 Token)"
@@ -207,25 +277,39 @@ const JobLeadDetailsPage = () => {
                   disabled={isUnlocking}
                   icon={<IoLockClosedOutline className="text-lg" />}
                   iconPosition="left"
-                  className="w-full justify-center py-3.5 rounded-xl text-[15px] font-semibold"
+                  styleClass="w-full justify-center"
                 />
-                <p className="text-xs text-muted text-center mt-3">
+                <p className="text-xs text-muted text-center">
                   Reveals exact address and lets you place a bid.
                 </p>
-              </>
+              </div>
             )}
 
             {/* STATE 2: Unlocked, ready to bid */}
             {isUnlocked && !isBidding && !hasSubmitted && (
-              <SeButton
-                btnText="Place Bid"
-                variant="accentLight"
-                clickFunc={() => setIsBidding(true)}
-                className="w-full justify-center py-3.5 rounded-xl text-[15px] font-semibold"
-              />
+              <div className="space-y-4">
+                <div className="bg-accent/5 rounded-xl p-4 border border-accent/20">
+                  <div className="flex items-center gap-2 mb-2">
+                    <IoEyeOutline className="text-accent" size={18} />
+                    <span className="text-sm font-semibold text-text-dark">
+                      Full Address
+                    </span>
+                  </div>
+                  <p className="text-xs text-text-dark leading-relaxed break-words">
+                    {job.address}
+                  </p>
+                </div>
+
+                <SeButton
+                  btnText="Place Bid"
+                  variant="accentLight"
+                  clickFunc={() => setIsBidding(true)}
+                  styleClass="w-full justify-center"
+                />
+              </div>
             )}
 
-            {/* STATE 3: Actively bidding (Replaced with React Hook Form) */}
+            {/* STATE 3: Bidding form */}
             {isUnlocked && isBidding && !hasSubmitted && (
               <form
                 onSubmit={handleSubmit(onSubmit)}
@@ -243,15 +327,15 @@ const JobLeadDetailsPage = () => {
                       type="number"
                       placeholder="2500"
                       {...register("quotedPrice", { valueAsNumber: true })}
-                      className={`w-full h-10.5 pl-9 pr-3 rounded-lg border bg-card-bg text-text-dark text-sm focus:outline-none ${
+                      className={`w-full h-10 pl-9 pr-3 rounded-lg border bg-white text-text-dark text-sm focus:outline-none transition-colors ${
                         errors.quotedPrice
-                          ? "border-red-500 focus:border-red-500"
-                          : "border-light-gray focus:border-accent"
+                          ? "border-soft-danger focus:border-soft-danger focus:ring-2 focus:ring-soft-danger/15"
+                          : "border-light-gray hover:border-accent/40 focus:border-accent focus:ring-2 focus:ring-accent/15"
                       }`}
                     />
                   </div>
                   {errors.quotedPrice && (
-                    <span className="text-xs text-red-500">
+                    <span className="text-xs text-soft-danger font-medium">
                       {errors.quotedPrice.message}
                     </span>
                   )}
@@ -265,20 +349,24 @@ const JobLeadDetailsPage = () => {
                     placeholder="Why are you the right fit for this job?"
                     rows={4}
                     {...register("message")}
-                    className={`w-full p-3 rounded-lg border bg-card-bg text-text-dark text-sm focus:outline-none resize-none ${
+                    className={`w-full p-3 rounded-lg border bg-white text-text-dark text-sm focus:outline-none resize-none transition-colors ${
                       errors.message
-                        ? "border-red-500 focus:border-red-500"
-                        : "border-light-gray focus:border-accent"
+                        ? "border-soft-danger focus:border-soft-danger focus:ring-2 focus:ring-soft-danger/15"
+                        : "border-light-gray hover:border-accent/40 focus:border-accent focus:ring-2 focus:ring-accent/15"
                     }`}
                   />
                   <div className="flex justify-between items-center">
-                    <span className="text-xs text-red-500">
+                    <span className="text-xs text-soft-danger font-medium">
                       {errors.message?.message}
                     </span>
                     <span
-                      className={`text-xs ${messageValue.length > 300 ? "text-red-500" : "text-muted"}`}
+                      className={`text-xs font-medium ${
+                        messageValue.length > 300
+                          ? "text-soft-danger"
+                          : "text-muted"
+                      }`}
                     >
-                      {300 - messageValue.length} characters left
+                      {300 - messageValue.length} left
                     </span>
                   </div>
                 </div>
@@ -287,20 +375,20 @@ const JobLeadDetailsPage = () => {
                   <SeButton
                     btnText="Cancel"
                     variant="outline"
-                    type="button" // Prevents accidental form submission
+                    type="button"
                     clickFunc={() => {
                       setIsBidding(false);
-                      reset(); // Clear form memory if they cancel
+                      reset();
                     }}
                     disabled={isSubmitting}
-                    className="w-1/3 justify-center py-3.5 rounded-xl"
+                    styleClass="w-1/3 justify-center"
                   />
                   <SeButton
                     btnText={isSubmitting ? "Submitting..." : "Submit Quote"}
                     variant="accentLight"
-                    type="submit" // Triggers handleSubmit
+                    type="submit"
                     disabled={!isValid || isSubmitting}
-                    className="w-2/3 justify-center py-3.5 rounded-xl"
+                    styleClass="w-2/3 justify-center"
                   />
                 </div>
               </form>
@@ -308,26 +396,30 @@ const JobLeadDetailsPage = () => {
 
             {/* STATE 4: Submitted */}
             {hasSubmitted && (
-              <div className="flex flex-col items-center text-center gap-2 py-4 animate-in fade-in zoom-in duration-300">
-                <div className="w-11 h-11 rounded-full bg-green-100 flex items-center justify-center mb-1">
-                  <IoCheckmarkCircleOutline className="text-green-600 text-2xl" />
+              <div className="flex flex-col items-center text-center gap-3 py-4 animate-in fade-in zoom-in duration-300">
+                <div className="w-12 h-12 rounded-full bg-emerald-50 flex items-center justify-center mb-1">
+                  <IoCheckmarkCircleOutline className="text-emerald-500 text-2xl" />
                 </div>
-                <p className="text-base font-bold text-primary">Quote sent</p>
-                <p className="text-sm text-muted leading-relaxed">
+                <p className="text-base font-bold text-text-dark">Quote sent</p>
+                <p className="text-xs text-muted leading-relaxed">
                   {job.customerName} will be notified.
                 </p>
 
                 {job.myBid && (
-                  <div className="w-full bg-light-gray/50 rounded-xl p-4 mt-4 text-sm flex flex-col gap-3 text-left border border-light-gray">
+                  <div className="w-full bg-light rounded-xl p-4 mt-4 text-sm flex flex-col gap-3 text-left border border-light-gray/60">
                     <div className="flex justify-between items-center">
-                      <span className="text-muted font-medium">Your quote</span>
-                      <span className="font-bold text-primary text-base">
+                      <span className="text-muted font-medium text-xs">
+                        Your quote
+                      </span>
+                      <span className="font-bold text-text-dark text-base">
                         Rs. {job.myBid.quotedPrice}
                       </span>
                     </div>
                     <div className="flex justify-between items-center">
-                      <span className="text-muted font-medium">Status</span>
-                      <span className="text-xs font-bold tracking-wider uppercase px-2 py-1 rounded-md bg-accent/10 text-accent">
+                      <span className="text-muted font-medium text-xs">
+                        Status
+                      </span>
+                      <span className="text-[10px] font-bold tracking-wider uppercase px-2.5 py-1 rounded-full bg-accent/10 text-accent">
                         {job.myBid.status}
                       </span>
                     </div>
@@ -336,21 +428,23 @@ const JobLeadDetailsPage = () => {
               </div>
             )}
 
-            {/* Contact Details — visible only if unlocked */}
+            {/* Contact Details */}
             {isUnlocked && (
-              <div className="mt-6 pt-6 border-t border-light-gray">
+              <div className="mt-6 pt-6 border-t border-light-gray/60">
                 <div className="flex items-center gap-3 mb-4">
                   {job.customerImageUrl ? (
                     <img
                       src={job.customerImageUrl}
                       alt={job.customerName}
-                      className="w-10 h-10 rounded-full object-cover"
+                      className="w-10 h-10 rounded-full object-cover border-2 border-light-gray"
                     />
                   ) : (
-                    <IoPersonCircleOutline className="text-4xl text-muted/50 shrink-0" />
+                    <div className="w-10 h-10 rounded-full bg-light flex items-center justify-center">
+                      <IoPersonCircleOutline className="text-2xl text-muted/50" />
+                    </div>
                   )}
                   <div>
-                    <p className="text-xs text-muted font-medium uppercase tracking-wider">
+                    <p className="text-[10px] text-muted font-bold uppercase tracking-widest">
                       Posted By
                     </p>
                     <p className="text-sm font-bold text-text-dark">
@@ -359,18 +453,13 @@ const JobLeadDetailsPage = () => {
                   </div>
                 </div>
                 {job.contactNumber && (
-                  <div className="bg-light p-4 rounded-xl border border-light-gray/50">
-                    <p className="text-xs font-bold text-muted uppercase tracking-wider mb-2">
-                      Contact Number
-                    </p>
-                    <a
-                      href={`tel:${job.contactNumber}`}
-                      className="flex items-center gap-2 text-primary font-bold hover:text-accent transition-colors text-lg"
-                    >
-                      <IoCallOutline />
-                      {job.contactNumber}
-                    </a>
-                  </div>
+                  <a
+                    href={`tel:${job.contactNumber}`}
+                    className="flex items-center justify-center gap-2 w-full py-3 bg-light rounded-xl border border-light-gray/60 text-primary font-bold hover:bg-accent hover:text-white hover:border-accent transition-all duration-200 text-sm"
+                  >
+                    <IoCallOutline size={16} />
+                    {job.contactNumber}
+                  </a>
                 )}
               </div>
             )}

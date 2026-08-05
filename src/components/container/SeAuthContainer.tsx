@@ -17,7 +17,7 @@ const SeAuthContainer = ({
       {/* Back to home */}
       <Link
         to="/"
-        className="absolute top-6 left-6 flex items-center gap-2 text-sm text-muted hover:text-text-dark transition"
+        className={`absolute top-6  ${reverse ? "right-6" : "left-6"} flex items-center gap-2 text-sm text-muted hover:text-text-dark transition`}
       >
         <LuArrowLeft className="w-4 h-4" />
         Home

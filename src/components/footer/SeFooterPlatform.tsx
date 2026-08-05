@@ -2,10 +2,10 @@ import SeFooterLink from "./SeFooterLink";
 import SeFooterTitle from "./SeFooterTitle";
 
 const links = [
-  { name: "How it works", path: "/how-it-works" },
-  { name: "Features", path: "/features" },
-  { name: "Pricing", path: "/pricing" },
-  { name: "FAQ", path: "/faq" },
+  { name: "How it works", path: "/#how-it-works" },
+  { name: "Built Different", path: "/#built-different" },
+  { name: "Pricing", path: "/#pricing" },
+  { name: "FAQ", path: "/#faq" },
 ];
 
 const SeFooterPlatform = () => {

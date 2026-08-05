@@ -54,7 +54,7 @@ const DashboardHome = () => {
       <div className="py-8 grid gap-6">
         <div>
           <div className="flex items-center justify-between">
-            <SeDashboardHeader title={title} />
+            {user.role !== "ADMIN" && <SeDashboardHeader title={title} />}
             {user.role === "CUSTOMER" && (
               <SeButton
                 btnText="Post a New Job"

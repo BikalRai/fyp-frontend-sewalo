@@ -78,7 +78,7 @@ const AdminProvidersPage = () => {
   const pendingCount = providers?.length || 0;
 
   return (
-    <div className="p-8 max-w-6xl mx-auto space-y-6 relative">
+    <div className="space-y-6 relative">
       {/* Header */}
       <div>
         <h1 className="text-2xl font-bold text-gray-900">Provider Approvals</h1>

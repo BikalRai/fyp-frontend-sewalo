@@ -98,15 +98,24 @@ const Login = () => {
           error={errors.password?.message}
         />
 
-        {/* Keep signed in */}
-        <label className="flex items-center gap-2 cursor-pointer select-none">
-          <input
-            type="checkbox"
-            className="w-4 h-4 appearance-none rounded-full border border-muted/30 checked:bg-text-dark checked:border-text-dark cursor-pointer"
-          />
+        <div className="flex items-center justify-between">
+          {/* Keep signed in */}
+          <label className="flex items-center gap-2 cursor-pointer select-none">
+            <input
+              type="checkbox"
+              className="w-4 h-4 appearance-none rounded-full border border-muted/30 checked:bg-text-dark checked:border-text-dark cursor-pointer"
+            />
 
-          <span className="text-sm text-gray-500">Keep me signed in</span>
-        </label>
+            <span className="text-sm text-gray-500">Keep me signed in</span>
+          </label>
+
+          <Link
+            to={"/forgot-password"}
+            className="text-sm text-gray-500 hover:underline transition-all duration-200"
+          >
+            Forgot password?
+          </Link>
+        </div>
 
         {/* Submit */}
 

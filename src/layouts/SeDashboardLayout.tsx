@@ -64,14 +64,17 @@ const SeDashboardLayout = ({ children }: IContainerProp) => {
       </div>
     );
 
-  console.log(user, "USER IN LAYOUT");
-
   return (
     <div className="h-dvh w-full flex overflow-hidden">
       <aside className="bg-primary h-full overflow-y-auto w-16 lg:w-60 shrink-0 transition-all duration-300">
         <SeDashboardNavbar role={user.role} />
       </aside>
-      <main className="flex-1 flex flex-col min-w-0 h-full overflow-y-auto relative bg-bg">
+
+      {/* 
+        FIX 1: Added overflow-x-hidden. 
+        This acts as a strict boundary. Wide tables can no longer force the main container to stretch horizontally. 
+      */}
+      <main className="flex-1 flex flex-col min-w-0 h-full overflow-y-auto overflow-x-hidden relative bg-bg">
         <div className="sticky top-0 z-10 p-4 flex items-center justify-between border-b border-b-muted/40 bg-light">
           <div className="flex items-center">
             <LuPanelLeft className="h-4 w-4 hover:text-accent transition-colors duration-200 cursor-pointer" />
@@ -167,12 +170,10 @@ const SeDashboardLayout = ({ children }: IContainerProp) => {
             </Popover>
             <div className="flex items-center gap-2">
               {user.role === "ADMIN" ? (
-                /* --- ADMIN VIEW: No avatar, just a system role badge --- */
                 <div className="bg-primary/10 text-primary border border-primary/20 px-3 py-1.5 rounded-md text-xs font-bold tracking-wider uppercase cursor-default">
                   Admin
                 </div>
               ) : (
-                /* --- CUSTOMER/PROVIDER VIEW: Standard avatar and name --- */
                 <>
                   <div className="w-8 h-8 rounded-full flex items-center justify-center bg-accent/10 hover:bg-accent/20 transition-colors duration-200 cursor-pointer overflow-hidden">
                     {user.imageUrl ? (
@@ -197,8 +198,12 @@ const SeDashboardLayout = ({ children }: IContainerProp) => {
         </div>
 
         {/* Dashboard Content */}
+        {/* 
+          FIX 2: Added min-w-0, w-full, and max-w-full to the wrapper. 
+          This ensures the flexible child doesn't secretly expand the parent.
+        */}
         <DashboardContentLayoutPadding>
-          <div className="flex-1">{children}</div>
+          <div className="flex-1 min-w-0 w-full max-w-full">{children}</div>
         </DashboardContentLayoutPadding>
       </main>
     </div>
