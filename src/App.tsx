@@ -7,7 +7,11 @@ import "leaflet/dist/leaflet.css";
 
 function App() {
   return (
-    <MantineProvider>
+    <MantineProvider
+      theme={{
+        fontFamily: "Montserrat, sans-serif",
+      }}
+    >
       <div>
         <Toaster position="top-right" richColors />
         <AppRoutes />

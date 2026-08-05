@@ -15,7 +15,7 @@ export interface INavbarProps {
 const navLinks = [
   { id: 1, path: "/", name: "Home" },
   { id: 2, path: "/#how-it-works", name: "How It Works" },
-  { id: 3, path: "/#features", name: "Features" },
+  { id: 3, path: "/#built-different", name: "Built Different" },
   { id: 4, path: "/#pricing", name: "Pricing" },
   { id: 5, path: "/#faq", name: "FAQ" },
 ];

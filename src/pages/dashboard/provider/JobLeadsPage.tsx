@@ -70,7 +70,7 @@ const JobLeadsPage = () => {
   const greeting =
     hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
   return (
-    <div className="max-w-5xl mx-auto pb-12 p-4">
+    <div className="pb-12 p-4">
       <div className="flex items-start justify-between mb-6">
         <div>
           <div className="inline-flex items-center gap-1.5 text-xs font-medium text-accent bg-accent/10 px-3 py-1 rounded-full mb-3">

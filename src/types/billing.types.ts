@@ -84,3 +84,27 @@ export interface InitiatePaymentParams {
   creditsRequested?: number;
   purchaseType: PurchaseType;
 }
+
+export interface IEsewaInitiateRequest {
+  amount: number;
+  purchaseType: PurchaseType;
+}
+
+// The exact payload your Spring Boot backend generates
+export interface IEsewaInitiateResponse {
+  amount: string;
+  tax_amount: string;
+  total_amount: string;
+  transaction_uuid: string;
+  product_code: string;
+  product_service_charge: string;
+  product_delivery_charge: string;
+  success_url: string;
+  failure_url: string;
+  signed_field_names: string;
+  signature: string;
+  gateway_url: string;
+}
+
+// Since the backend returns `null` for the data object on a successful verification
+export type IEsewaVerifyResponse = null;

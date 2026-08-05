@@ -16,9 +16,9 @@ const HowItWorks = () => {
   return (
     <SeContainerPadding>
       <SeContainer>
-        <section className='py-25.5 grid gap-12' id='how-it-works'>
+        <section className="py-25.5 grid gap-12" id="how-it-works">
           <HowItWorksHeading />
-          <div className='flex justify-center items-center gap-6 bg-light w-fit mx-auto p-1.5 rounded-lg'>
+          <div className="flex justify-center items-center gap-6 bg-light w-fit mx-auto p-1.5 rounded-lg">
             <div
               onClick={() => setActive("home-owner")}
               className={`${baseClass} ${active === "home-owner" ? activeClass : ""}`}
@@ -34,7 +34,7 @@ const HowItWorks = () => {
             </div>
           </div>
 
-          <div className='relative flex justify-center'>
+          <div className="relative flex justify-center">
             <HomeOwner
               className={`transition-all duration-500 ease-out ${active === "home-owner" ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-40 pointer-events-none absolute inset-0"}`}
             />

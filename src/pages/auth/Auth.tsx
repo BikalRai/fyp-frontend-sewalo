@@ -1,6 +1,6 @@
 import SeAuthContainer from "@/components/container/SeAuthContainer";
 import AuthSidePanel from "@/layouts/AuthSidePanel";
-import { loginImg } from "@/uitls/images";
+import { loginImg, registerImg } from "@/uitls/images";
 import { Outlet, useLocation } from "react-router-dom";
 
 const Auth = () => {
@@ -8,9 +8,11 @@ const Auth = () => {
 
   const isRegister = pathname.includes("register");
 
+  console.log(isRegister);
+
   const panelData = isRegister
     ? {
-        image: loginImg,
+        image: registerImg,
         quote: "Found my first 10 clients in two weeks.",
         author: "Sanjay Tamang",
         caption: "Electrician • Baneshwor ⚡",

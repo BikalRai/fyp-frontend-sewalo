@@ -31,6 +31,7 @@ import ChatRoomPage from "@/pages/ChatRoomPage";
 import AdminJobsPage from "@/pages/admin/AdminJobsPage";
 import AdminAllProvidersPage from "@/pages/admin/AdminAllProvidersPage ";
 import AdminTransactionsPage from "@/pages/admin/AdminTransactionsPage ";
+import ForgotPassword from "@/pages/auth/ForgotPassword";
 
 interface RequireAuthProps {
   allowedRoles?: string[];
@@ -79,6 +80,10 @@ const router = createBrowserRouter([
   {
     path: "/",
     element: <Home />,
+  },
+  {
+    path: "/forgot-password",
+    element: <ForgotPassword />,
   },
   {
     path: "/auth",

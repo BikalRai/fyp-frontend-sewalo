@@ -141,7 +141,7 @@ const ProviderProfileSettings = () => {
     <FormProvider {...methods}>
       <form
         onSubmit={handleSubmit(onSubmit)}
-        className="max-w-5xl mx-auto grid gap-12 pb-16 pt-6"
+        className="grid gap-12 pb-16 pt-6"
       >
         {/* 1. Professional Identity */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-12">

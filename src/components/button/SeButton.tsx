@@ -36,9 +36,9 @@ const variantStlyes = {
 };
 
 const buttonStyles = {
-  sm: "px-4 py-2 text-xs",
-  md: "px-5 py-3 text-sm",
-  large: "px-6 py-4 text-base",
+  sm: "px-3 sm:px-4 py-2 text-xs",
+  md: "px-4 sm:px-5 py-2.5 sm:py-3 text-xs sm:text-sm",
+  large: "px-5 sm:px-6 py-3 sm:py-4 text-sm sm:text-base",
 };
 
 const SeButton = ({
@@ -59,20 +59,20 @@ const SeButton = ({
       type={type}
       onClick={clickFunc}
       disabled={disabled}
-      className={`${buttonStyles[size]} border rounded-lg font-semibold ${variantStlyes[variant]} flex items-center justify-center gap-2 active:shadow-lg ${variant === "tertiary" ? "" : "hover:shadow-sm"} transition group cursor-pointer text-xs md:text-sm disabled:bg-accent/40 
+      className={`${buttonStyles[size]} border rounded-lg font-semibold ${variantStlyes[variant]} flex items-center justify-center gap-1.5 sm:gap-2 active:shadow-lg ${variant === "tertiary" ? "" : "hover:shadow-sm"} transition group cursor-pointer disabled:bg-accent/40 
         disabled:cursor-not-allowed 
         disabled:pointer-events-none 
         disabled:shadow-none
         ${!disabled ? "cursor-pointer" : ""} ${styleClass} ${className}`}
     >
       {iconIsLeft && icon && (
-        <span className="group-hover:-translate-x-1 transition-transform duration-300">
+        <span className="shrink-0 group-hover:-translate-x-1 transition-transform duration-300">
           {icon}
         </span>
       )}
-      <span>{btnText}</span>
+      <span className="truncate">{btnText}</span>
       {!iconIsLeft && icon && (
-        <span className="group-hover:translate-x-1 transition-transform duration-300">
+        <span className="shrink-0 group-hover:translate-x-1 transition-transform duration-300">
           {icon}
         </span>
       )}

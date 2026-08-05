@@ -2,10 +2,10 @@ import SeFooterLink from "./SeFooterLink";
 import SeFooterTitle from "./SeFooterTitle";
 
 const links = [
-  { name: "Register as a pro", path: "/register" },
-  { name: "Starter plan", path: "/starter" },
-  { name: "Pro plan", path: "/pro" },
-  { name: "Business plan", path: "/business" },
+  { name: "Register as a pro", path: "/auth/register" },
+  { name: "Starter plan", path: "/#pricing" },
+  { name: "Pro plan", path: "/#pricing" },
+  { name: "Business plan", path: "/#pricing" },
 ];
 
 const SeFooterProviders = () => {
