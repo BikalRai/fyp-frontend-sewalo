@@ -70,13 +70,6 @@ body {
   color: var(--color-primary);
 }
 
-/* ─── Focus Ring (global) ─── */
-*:focus-visible {
-  outline: 2px solid var(--color-accent);
-  outline-offset: 2px;
-  border-radius: 4px;
-}
-
 /* ─── Input Autofill Fix ─── */
 input:-webkit-autofill,
 input:-webkit-autofill:hover,
@@ -92,15 +85,6 @@ textarea:-webkit-autofill:focus {
 /* ─── Image Rendering ─── */
 img {
   image-rendering: -webkit-optimize-contrast;
-}
-
-/* ─── Smooth Transitions on Interactive Elements ─── */
-button,
-a,
-input,
-textarea,
-select {
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* ─── Disabled State Polish ─── */

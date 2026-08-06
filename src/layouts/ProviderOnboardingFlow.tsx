@@ -185,7 +185,7 @@ const ProviderOnboardingFlow = () => {
                     <div>
                       Step {active + 1} of {TOTAL_STEPS}
                     </div>
-                    <div>{((active + 1) / TOTAL_STEPS) * 100}%</div>
+                    <div>{Math.floor(((active + 1) / TOTAL_STEPS) * 100)}%</div>
                   </div>
                   <SeStepper
                     currentStep={active + 1}

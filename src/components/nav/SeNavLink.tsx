@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 
 export interface ILinkProps {
   path: string;
@@ -7,52 +7,74 @@ export interface ILinkProps {
   setActiveLink: (path: string) => void;
 }
 
-const baseClass = `text-sm font-medium text-muted after:content-[''] after:block after:mt-2 after:bg-primary after:h-0.5 after:w-0 hover:after:w-full hover:after:transition-all hover:after:duration-300`;
+// 1. Added transition-colors for the text fade
+// 2. Moved after:transition-all and after:duration-300 to the base state (removed hover: prefix)
+const baseClass =
+  "text-sm font-medium transition-colors duration-300 ease-in-out hover:text-primary " +
+  "after:content-[''] after:block after:mt-1 after:bg-primary after:h-[2px] after:w-0 " +
+  "after:transition-all after:duration-300 after:ease-in-out hover:after:w-full";
 
-const activeClass = `text-primary after:w-full`;
+// 3. We use activeClass to override the base text color and after:w-0
+const activeClass = "text-primary after:w-full";
+const inactiveClass = "text-muted";
 
 const SeNavLink = ({ path, name, activeLink, setActiveLink }: ILinkProps) => {
-  const isHash = path.includes("#");
+  const navigate = useNavigate();
+  const location = useLocation();
 
-  const handleHashClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
-    // Extract the ID from the path (e.g., "#pricing" becomes "pricing")
-    const targetId = path.split("#")[1];
+  const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    setActiveLink(path);
 
-    // Search the DOM for the section with this ID
-    const element = document.getElementById(targetId);
+    // HOME
+    if (path === "/") {
+      if (location.pathname === "/") {
+        e.preventDefault();
 
-    if (element) {
-      // Prevent the default instant jump
-      e.preventDefault();
+        window.scrollTo({
+          top: 0,
+          behavior: "smooth",
+        });
+      }
 
-      // Execute a smooth native scroll to the element
-      element.scrollIntoView({ behavior: "smooth", block: "start" });
-
-      // Update the URL hash without triggering a page reload
-      window.history.pushState({}, "", path);
+      return;
     }
 
-    // Update active state regardless
-    setActiveLink(path);
+    // SECTION LINKS
+    if (path.includes("#")) {
+      const targetId = path.split("#")[1];
+
+      // Already on home page
+      if (location.pathname === "/") {
+        const element = document.getElementById(targetId);
+
+        if (element) {
+          e.preventDefault();
+
+          element.scrollIntoView({
+            behavior: "smooth",
+            block: "start",
+          });
+
+          window.history.pushState({}, "", path);
+        }
+
+        return;
+      }
+
+      // Coming from another page
+      e.preventDefault();
+      navigate(path);
+    }
   };
 
-  if (isHash) {
-    return (
-      <a
-        href={path}
-        onClick={handleHashClick}
-        className={`${baseClass} ${activeLink === path ? activeClass : ""}`}
-      >
-        {name}
-      </a>
-    );
-  }
+  const isActive = activeLink === path;
 
   return (
     <Link
       to={path}
-      onClick={() => setActiveLink(path)}
-      className={`${baseClass} ${activeLink === path ? activeClass : ""}`}
+      onClick={handleClick}
+      // Apply baseClass, then evaluate if it should get the active or inactive specific classes
+      className={`${baseClass} ${isActive ? activeClass : inactiveClass}`}
     >
       {name}
     </Link>

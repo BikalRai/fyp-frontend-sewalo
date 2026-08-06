@@ -5,6 +5,7 @@ import {
   updateUserAddress,
 } from "@/services/user.service";
 import { useAuthStore } from "@/store/authStore";
+import type { ApiErrorResponse } from "@/types/api.types";
 import type { UpdateCustomerPayload } from "@/types/user.types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -49,10 +50,10 @@ export const useUpdateCustomerProfile = () => {
       // Force the profile data to instantly refresh across the app
       queryClient.invalidateQueries({ queryKey: userKeys.me() });
     },
-    onError: (error) => {
-      // Safely extract the error message from the backend response if it exists
-      const message = error?.message || "Failed to update profile";
-      toast.error(message);
+    onError: (error: ApiErrorResponse) => {
+      console.log(error);
+
+      toast.error(error.details);
     },
   });
 };
